@@ -9,8 +9,13 @@ We aim to implement an \textbf{reinforcement learning} algorithm which can play 
 A short outline of what the project will include, but is not limited to, is presented below.
 \begin{enumerate}
 \item A working reinforcement algorithm which is able to play blackjack using the existing blackjack libraries, ex. OpenAI Gym: https://github.com/dennybritz/reinforcement-learning/blob/master/lib/envs/blackjack.py.
-\item Code in python 3.6 together with tensorflow whenever possible.
-\item Github repository available for future participants to work with.
+\item Code in Python 3.6 together with tensorflow whenever possible.
+\item A public GitHub repository available for future participants to work with.
 \end{enumerate}
 
-If time permits we will also...
+Our initial goal is to read up on various reinforcement learning algorithms
+and choose one to implement. Once implemented and trained, we will compare its 
+performance to theoretical bounds for blackjack. \textbf{If time permits}, we 
+will also try to implement other reinforcement learning algorithms, compare the 
+performance of all algorithms, and see if we can apply \emph{ensemble learning}
+to combine the algorithms into one. 
