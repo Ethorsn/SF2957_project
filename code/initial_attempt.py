@@ -27,11 +27,15 @@ G = 0
 
 alpha = 0.618
 
-for episode in range(1,1001):
+cumulative_reward = 0.0
+
+n_sims = 100000
+
+for episode in range(1,n_sims + 1):
     done = False
     G, reward = 0,0
     state = env.reset()
-    while done != True:
+    while not done:
         if state not in Q:
             Q[state] = np.zeros(env.action_space.n)
             action = env.action_space.sample()
@@ -43,5 +47,9 @@ for episode in range(1,1001):
         Q[state][action] += alpha * (reward + np.max(Q[state2]) - Q[state][action]) #3
         G += reward
         state = state2
-    if episode % 50 == 0:
+    cumulative_reward += G
+    if episode % n_sims // 10 == 0:
         print('Episode {} Total Reward: {}'.format(episode,G))
+
+print("Number of explored states: " + str(len(Q)))
+print("cumulative_reward = " + str(cumulative_reward))
