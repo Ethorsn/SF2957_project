@@ -21,35 +21,58 @@ env.observation_space
 obs_space_n = 32 * 11 * 2
 
 import numpy as np
-Q = dict()
 
-G = 0
+
+def learn_Q(env, n_sims, alpha, init_val = 0.0):
+    Q = dict()
+
+    avg_reward = 0.0
+
+    for episode in range(1,n_sims + 1):
+        done = False
+        action_reward = 0.0
+        episode_reward = 0.0
+        state = env.reset()
+        while not done:
+            if state not in Q:
+                # Initialize Q and take an action uniformly at random
+                Q[state] = np.zeros(env.action_space.n) + init_val
+                action = env.action_space.sample()
+            else:
+                # Take the best possible action
+                action = np.argmax(Q[state])
+            # Draw the next state and reward of previous action
+            state2, action_reward, done, info = env.step(action)
+
+            # If we haven't seen the new state before, initialize it for Q
+            if state2 not in Q:
+                Q[state2] = np.zeros(env.action_space.n) + init_val
+
+            # Update Q, state and episode reward
+            Q[state][action] += alpha * (action_reward + np.max(Q[state2]) - Q[state][action])
+            state = state2
+            episode_reward += action_reward
+
+            if episode % (n_sims // 100) == 0:
+                print('Avg. reward after {} episodes: {}'.format(episode,avg_reward))
+
+        # Game is over
+        avg_reward += (episode_reward - avg_reward) / (episode + 1)
+
+    return Q, avg_reward
+
+
 
 alpha = 0.618
+avg_reward = 0.0
+n_sims = 10000
 
-cumulative_reward = 0.0
+Q1, avg1 = learn_Q(env, n_sims, alpha, init_val = 0.0)
 
-n_sims = 100000
 
-for episode in range(1,n_sims + 1):
-    done = False
-    G, reward = 0,0
-    state = env.reset()
-    while not done:
-        if state not in Q:
-            Q[state] = np.zeros(env.action_space.n)
-            action = env.action_space.sample()
-        else:
-            action = np.argmax(Q[state]) #1
-        state2, reward, done, info = env.step(action) #2
-        if state2 not in Q:
-            Q[state2] = np.zeros(env.action_space.n)
-        Q[state][action] += alpha * (reward + np.max(Q[state2]) - Q[state][action]) #3
-        G += reward
-        state = state2
-    cumulative_reward += G
-    if episode % n_sims // 10 == 0:
-        print('Episode {} Total Reward: {}'.format(episode,G))
+print("Number of explored states: " + str(len(Q1)))
+print("Cumulative avg. reward = " + str(avg1))
 
-print("Number of explored states: " + str(len(Q)))
-print("cumulative_reward = " + str(cumulative_reward))
+for key, value in sorted(Q1.items(), key = lambda x: (x[0][0], (x[0][1]))):
+    if key[0] <= 21:
+        print('(my sum = {}, dealer sum = {}, ace = {}) -> (stick = {}, hit = {})'.format(key[0], key[1], key[2], round(value[0], 2), round(value[1], 2)))
