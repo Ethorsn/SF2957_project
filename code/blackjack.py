@@ -2,15 +2,20 @@ import gym.envs.toy_text.blackjack as bj
 import gym.spaces as spaces
 import numpy as np
 
+# deck = [1,2,3,4,5,6,7,8,9,10,10,10,10]
 deck_values = [x for x in range(11)]
 
-def sum_player_hand():
-    return np.dot(deck, deck_values)
+def draw_card(np_random):
+    return int(np_random.choice(deck))
 
-def draw_player_hand():
+def draw_player_hand(np_random):
     hand = np.zeros(len(deck_values), int)
-    hand[[bj.draw_card, bj.draw_card]] += 1
+    hand[draw_card(np_random) - 1] += 1
+    hand[draw_card(np_random) - 1] += 1
     return hand
+
+def sum_player_hand(hand):
+    return np.dot(deck_values, hand)
 
 def is_player_bust(hand):
     return sum_player_hand(hand) > 21
@@ -22,7 +27,7 @@ def player_score(hand):
 def sum_dealer_hand(hand):
     return bj.sum_hand(hand)
 
-def dealer_score(hand)
+def dealer_score(hand):
     return bj.score(hand)
 
 def draw_dealer_hand(n):
@@ -39,7 +44,8 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
     def __init__(self, natural=True):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
-                spaces.MultiDiscrete(10),
+        # MultiDiscrete is a vector of the number of possible values per element
+                spaces.MultiDiscrete([11,11,8,6,5,4,4,3,3,3]),
                 spaces.Discrete(11)))
         self.seed()
 
@@ -52,7 +58,7 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
     def step(self, action):
         assert self.action_space.contains(action)
         if action:  # hit: add a card to players hand and return
-            self.player[bj.draw_card(self.np_random)] += 1
+            self.player[bj.draw_card(self.np_random) - 1] += 1 # Subtract 1 due to 0-based indexing
             if is_player_bust(self.player):
                 done = True
                 reward = -1
@@ -68,6 +74,11 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
                 reward = 1.5
         return self._get_obs(), reward, done, {}
 
+    def seed(self, seed = None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
+
+
     def _get_obs(self):
         return (self.player, self.dealer[0])
 
@@ -75,4 +86,3 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
         self.dealer = draw_dealer_hand(self.np_random)
         self.player = draw_player_hand(self.np_random)
         return self._get_obs()
-
