@@ -1,9 +1,10 @@
 import gym.envs.toy_text.blackjack as bj
 import gym.spaces as spaces
 import numpy as np
+from gym.utils import seeding
 
-# deck = [1,2,3,4,5,6,7,8,9,10,10,10,10]
-deck_values = [x for x in range(11)]
+deck = np.array([1,2,3,4,5,6,7,8,9,10,10,10,10])
+deck_values = np.array([x for x in range(1, 12)])
 
 def draw_card(np_random):
     return int(np_random.choice(deck))
