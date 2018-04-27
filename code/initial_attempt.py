@@ -4,7 +4,9 @@
 # In this example, an infinite deck is used
 
 import gym
-env = gym.make('Blackjack-v0')
+import blackjack as bjk
+#env = gym.make('Blackjack-v0')
+env = bjk.BlackjackEnvExtend()
 env.reset()
 
 
@@ -62,17 +64,17 @@ def learn_Q(env, n_sims, alpha, init_val = 0.0):
     return Q, avg_reward
 
 
+if __name__ == "__main__":
+    alpha = 0.618
+    avg_reward = 0.0
+    n_sims = 10000
 
-alpha = 0.618
-avg_reward = 0.0
-n_sims = 10000
+    Q1, avg1 = learn_Q(env, n_sims, alpha, init_val = 0.0)
 
-Q1, avg1 = learn_Q(env, n_sims, alpha, init_val = 0.0)
+    print("Number of explored states: " + str(len(Q1)))
+    print("Cumulative avg. reward = " + str(avg1))
 
-
-print("Number of explored states: " + str(len(Q1)))
-print("Cumulative avg. reward = " + str(avg1))
-
-for key, value in sorted(Q1.items(), key = lambda x: (x[0][0], (x[0][1]))):
-    if key[0] <= 21:
-        print('(my sum = {}, dealer sum = {}, ace = {}) -> (stick = {}, hit = {})'.format(key[0], key[1], key[2], round(value[0], 2), round(value[1], 2)))
+    for key, value in sorted(Q1.items(), key = lambda x: (x[0][0], (x[0][1]))):
+        if key[0] <= 21:
+            print('(my sum = {}, dealer sum = {}, ace = {}) -> (stick = {}, hit = {})'.format(
+                key[0], key[1], key[2], round(value[0], 2), round(value[1], 2)))

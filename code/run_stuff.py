@@ -23,4 +23,12 @@ if __name__=="__main__":
     hand = bje.draw_player_hand(t)
     assert 2*2 == bje.sum_player_hand(hand)
 
-    print("exit 0")
+    print("-- Testing player_score not-bust scenario")
+    assert 2*2 == bje.player_score(hand)
+
+    print("-- Testing player_score bust scenario")
+    hand_mod = hand.copy()
+    hand_mod[10] = 2
+    assert 0 == bje.player_score(hand_mod)
+
+    print(env.step(1))

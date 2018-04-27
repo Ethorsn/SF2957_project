@@ -22,6 +22,7 @@ def is_player_bust(hand):
     return sum_player_hand(hand) > 21
 
 def player_score(hand):
+    # This function should be modified so that we can deal with aces
     return 0 if is_player_bust(hand) else sum_player_hand(hand)
 
 # Define the following functions for consistency
@@ -78,7 +79,6 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
     def seed(self, seed = None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
-
 
     def _get_obs(self):
         return (self.player, self.dealer[0])
