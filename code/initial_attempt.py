@@ -6,8 +6,9 @@
 import gym
 import blackjack as bjk
 import numpy as np
+from math import inf
 #env = gym.make('Blackjack-v0')
-decks = 2
+decks = inf
 env = bjk.BlackjackEnvExtend(decks=decks)
 
 # Show number of possible actions

@@ -2,6 +2,7 @@ import gym.envs.toy_text.blackjack as bj
 import gym.spaces as spaces
 import numpy as np
 from gym.utils import seeding
+from math import inf
 
 deck = np.array([1,2,3,4,5,6,7,8,9,10,10,10,10])
 deck_values = np.array([x for x in range(1, 11)])
@@ -17,7 +18,6 @@ def is_player_bust(hand):
     return sum_player_hand(hand) > 21
 
 def player_score(hand):
-    # This function should be modified so that we can deal with aces
     return 0 if is_player_bust(hand) else sum_player_hand(hand)
 
 # Define the following functions for consistency
@@ -28,6 +28,7 @@ def dealer_score(hand):
     return bj.score(hand)
 
 def is_natural(hand):
+    # A hand is a natural blackjack if it has 2 cars which total 21
     return True if sum(hand) == 2 & sum_player_hand(hand) == 21 else False
 
 class BlackjackEnvExtend(bj.BlackjackEnv):
@@ -38,7 +39,7 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
     Observation space is expanded, the player now sees the number of cards
     it is holding of each type.
     """
-    def __init__(self, decks, seed=3232, natural=True):
+    def __init__(self, decks = inf, seed=3232, natural=True):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
         # MultiDiscrete is a vector of the number of possible values per element
@@ -71,7 +72,7 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
                 reward = 1.5
         return self._get_obs(), reward, done, {}
 
-    def construct_deck(self,decks):
+    def construct_deck(self, decks):
         self.cards_in_deck = {x: decks for x in deck_values}
         # since we are looking at deck_values: 10, knight, queen, king
         # are valued equally. Update the last element such that we have 4 times
