@@ -35,6 +35,9 @@ def dealer_score(hand):
 def draw_dealer_hand(n):
     return bj.draw_hand(n)
 
+def is_natural(hand):
+    return True if sum(hand) == 2 & sum_player_hand(hand) == 21 else False
+
 class BlackjackEnvExtend(bj.BlackjackEnv):
     """
     Class which extends OpenAI BlackJackEnv class such that it is a proper
@@ -71,7 +74,7 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
             done = True
             while sum_dealer_hand(self.dealer) < 17:
                 self.dealer.append(draw_card(self.np_random))
-            reward = cmp(player_score(self.player), dealer_score(self.dealer))
+            reward = bj.cmp(player_score(self.player), dealer_score(self.dealer))
             if self.natural and is_natural(self.player) and reward == 1:
                 reward = 1.5
         return self._get_obs(), reward, done, {}
@@ -81,7 +84,8 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
         return [seed]
 
     def _get_obs(self):
-        return (self.player, self.dealer[0])
+        state = tuple(self.player)
+        return (state, self.dealer[0])
 
     def reset(self):
         self.dealer = draw_dealer_hand(self.np_random)
