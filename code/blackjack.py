@@ -5,16 +5,13 @@ from gym.utils import seeding
 
 deck = np.array([1,2,3,4,5,6,7,8,9,10,10,10,10])
 deck_values = np.array([x for x in range(1, 11)])
-deck_values_ace = deck_values.copy()
-deck_values_ace[0] = 11
-
-
-def _sph(hand, deck_val):
-    return np.dot(deck_val, hand)
 
 def sum_player_hand(hand):
-    return _sph(hand, deck_values) if (abs(_sph(hand, deck_values) - 21) <
-                                       abs(_sph(hand, deck_values_ace) - 21)) else _sph(hand, deck_values_ace)
+    return np.dot(deck_values, hand) if hand[0] == 0 else sum_with_ace(hand)
+
+def sum_with_ace(hand):
+    hand_sum = np.dot(deck_values, hand)
+    return hand_sum if not hand_sum + 10 <= 21 else hand_sum + 10
 
 def is_player_bust(hand):
     return sum_player_hand(hand) > 21
@@ -29,9 +26,6 @@ def sum_dealer_hand(hand):
 
 def dealer_score(hand):
     return bj.score(hand)
-
-def draw_dealer_hand(n):
-    return bj.draw_hand(n)
 
 def is_natural(hand):
     return True if sum(hand) == 2 & sum_player_hand(hand) == 21 else False
