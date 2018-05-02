@@ -4,19 +4,17 @@ import numpy as np
 from gym.utils import seeding
 
 deck = np.array([1,2,3,4,5,6,7,8,9,10,10,10,10])
-deck_values = np.array([x for x in range(1, 12)])
+deck_values = np.array([x for x in range(1, 11)])
+deck_values_ace = deck_values.copy()
+deck_values_ace[0] = 11
 
-def draw_card(np_random):
-    return int(np_random.choice(deck))
 
-def draw_player_hand(np_random):
-    hand = np.zeros(len(deck_values), int)
-    hand[draw_card(np_random) - 1] += 1
-    hand[draw_card(np_random) - 1] += 1
-    return hand
+def _sph(hand, deck_val):
+    return np.dot(deck_val, hand)
 
 def sum_player_hand(hand):
-    return np.dot(deck_values, hand)
+    return _sph(hand, deck_values) if (abs(_sph(hand, deck_values) - 21) <
+                                       abs(_sph(hand, deck_values_ace) - 21)) else _sph(hand, deck_values_ace)
 
 def is_player_bust(hand):
     return sum_player_hand(hand) > 21
@@ -46,24 +44,24 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
     Observation space is expanded, the player now sees the number of cards
     it is holding of each type.
     """
-    def __init__(self, natural=True):
+    def __init__(self, decks, seed=3232, natural=True):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
         # MultiDiscrete is a vector of the number of possible values per element
                 spaces.MultiDiscrete([11,11,8,6,5,4,4,3,3,3]),
                 spaces.Discrete(11)))
-        self.seed()
-
+        self.seed(seed)
+        # initialize the number of cards to have of each deck
         # Flag to payout 1.5 on a "natural" blackjack win, like casino rules
         # Ref: http://www.bicyclecards.com/how-to-play/blackjack/
         self.natural = natural
         # Start the first game
-        self.reset()
+        self.reset(decks)
 
     def step(self, action):
         assert self.action_space.contains(action)
         if action:  # hit: add a card to players hand and return
-            self.player[bj.draw_card(self.np_random) - 1] += 1 # Subtract 1 due to 0-based indexing
+            self.player[self.draw_card(self.np_random) - 1] += 1 # Subtract 1 due to 0-based indexing
             if is_player_bust(self.player):
                 done = True
                 reward = -1
@@ -73,21 +71,53 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
         else:  # stick: play out the dealers hand, and score
             done = True
             while sum_dealer_hand(self.dealer) < 17:
-                self.dealer.append(draw_card(self.np_random))
+                self.dealer.append(self.draw_card(self.np_random))
             reward = bj.cmp(player_score(self.player), dealer_score(self.dealer))
             if self.natural and is_natural(self.player) and reward == 1:
                 reward = 1.5
         return self._get_obs(), reward, done, {}
+
+    def construct_deck(self,decks):
+        self.cards_in_deck = {x: decks for x in deck_values}
+        # since we are looking at deck_values: 10, knight, queen, king
+        # are valued equally. Update the last element such that we have 4 times
+        # as many cards
+        self.cards_in_deck[10] = decks*4
+
+    def subtract_card_from_deck(self, card):
+        if self.cards_in_deck[card] > 1:
+        # if there is more than one card left, subtract it!
+            self.cards_in_deck[card] -= 1
+        else:
+            # if there is exactly one card left, than after it is used we
+            # remove the key, thus we cannot draw the card again
+            self.cards_in_deck.pop(card)
+
+    def draw_card(self, np_random):
+        # we can only draw cards which are in the keys of cards_in_deck.
+        card = int(np_random.choice(list(self.cards_in_deck.keys())))
+        # subtract the card from the deck
+        self.subtract_card_from_deck(card)
+        return card
+
+    def draw_player_hand(self, np_random):
+        hand = np.zeros(len(deck_values), int)
+        hand[self.draw_card(np_random) - 1] += 1
+        hand[self.draw_card(np_random) - 1] += 1
+        return hand
+
+    def draw_dealer_hand(self, n):
+        return self.draw_card(n)
 
     def seed(self, seed = None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def _get_obs(self):
-        state = tuple(self.player)
-        return (state, self.dealer[0])
+        return (tuple(self.player), self.dealer[0])
 
-    def reset(self):
-        self.dealer = draw_dealer_hand(self.np_random)
-        self.player = draw_player_hand(self.np_random)
+    def reset(self, decks):
+        self.construct_deck(decks)
+        self.dealer = [self.draw_dealer_hand(self.np_random)]
+        self.player = self.draw_player_hand(self.np_random)
         return self._get_obs()

@@ -5,14 +5,13 @@
 
 import gym
 import blackjack as bjk
+import numpy as np
 #env = gym.make('Blackjack-v0')
-env = bjk.BlackjackEnvExtend()
-env.reset()
-
-
+decks = 2
+env = bjk.BlackjackEnvExtend(decks=decks)
 
 # Show number of possible actions
-env.action_space.n # 0=stick, 1=hit
+print(env.action_space.n) # 0=stick, 1=hit
 
 # Observation space is 32 x 11 x 2
 # 32 = the player's current sum
@@ -21,9 +20,6 @@ env.action_space.n # 0=stick, 1=hit
 env.observation_space
 
 obs_space_n = 32 * 11 * 2
-
-import numpy as np
-
 
 def learn_Q(env, n_sims, alpha, init_val = 0.0):
     Q = dict()
@@ -34,7 +30,7 @@ def learn_Q(env, n_sims, alpha, init_val = 0.0):
         done = False
         action_reward = 0.0
         episode_reward = 0.0
-        state = env.reset()
+        state = env.reset(decks)
         while not done:
             if state not in Q:
                 # Initialize Q and take an action uniformly at random
@@ -73,8 +69,6 @@ if __name__ == "__main__":
     print("Number of explored states: " + str(len(Q1)))
     print("Cumulative avg. reward = " + str(avg1))
     for key, value in sorted(Q1.items(), key = lambda x: (x[0][0], (x[0][1]))):
-        print(value[0])
-        print(value[1])
         if bjk.sum_player_hand(key[0]) <= 21:
             print('(my hand = {}, dealer sum = {}) -> (stick = {}, hit = {})'.format(
                 key[0], key[1],round(value[0], 2), round(value[1], 2)))
