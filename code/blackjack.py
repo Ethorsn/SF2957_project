@@ -16,7 +16,7 @@ def sum_with_ace(hand):
     return hand_sum if not hand_sum + 10 <= 21 else hand_sum + 10
 
 def usable_ace(hand):
-    return hand[0] == 1 and np.dot(deck_values, hand) + 10 <= 21
+    return hand[0] > 0 and np.dot(deck_values, hand) + 10 <= 21
 
 def is_player_bust(hand):
     return sum_player_hand(hand) > 21
