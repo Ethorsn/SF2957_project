@@ -128,12 +128,12 @@ if __name__ == "__main__":
     #print("Cumulative avg. reward = " + str(avg_reward))
 
     sum_Q_nofill = convert_to_sum_states(Q, fill_missing = False)
-    sum_Q_fill = convert_to_sum_states(Q, fill_missing = False)
-    print("Number of explored sum states: " + str(len(sum_Q)))
-    print("Unexplored sum_states)
+    sum_Q_fill = convert_to_sum_states(Q, fill_missing = True)
+    print("Number of explored sum states: " + str(len(sum_Q_nofill)))
+    print("Unexplored sum_states: " + str(len(sum_Q_fill) - len(sum_Q_nofill)))
 
     V_10k = mc_prediction(lambda x: Q_policy(x, Q), env, 10000)
-    V_10k_sum = convert_to_sum_states(V_10k, False, 0)
+    V_10k_sum = convert_to_sum_states(V_10k, True, 0)
     plotting.plot_value_function(V_10k_sum, title="10,000 Steps")
 
     #V_500k = mc_prediction(lambda x: Q_policy(x, Q), env, 500000)
