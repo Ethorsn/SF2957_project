@@ -10,6 +10,9 @@ from math import inf
 import plotting as pl
 from collections import defaultdict
 from mc_prediction import mc_prediction
+import random
+
+
 matplotlib.style.use('ggplot')
 #env = gym.make('Blackjack-v0')
 decks = inf
@@ -28,7 +31,9 @@ env.observation_space
 
 obs_space_n = 32 * 11 * 2
 
-def learn_Q(env, n_sims, alpha, epsilon = 0.05, Q_init = dict()):
+def learn_Q(env, n_sims, alpha,
+            init_val = 0.0, epsilon = 0.05,
+            Q_init = dict()):
     Q = Q_init
     state_count = defaultdict(int)
 
@@ -46,8 +51,12 @@ def learn_Q(env, n_sims, alpha, epsilon = 0.05, Q_init = dict()):
                 Q[state] = np.zeros(env.action_space.n) + init_val
                 action = env.action_space.sample()
             else:
-                # Take the best possible action
-                action = np.argmax(Q[state])
+                if random.random() > epsilon:
+                    # Take the best possible action
+                    action = np.argmax(Q[state])
+                else:
+                    # Take a random action
+                    action = env.action_space.sample()
             # Draw the next state and reward of previous action
             state2, action_reward, done, info = env.step(action)
             # If we haven't seen the new state before, initialize it for Q
@@ -99,10 +108,10 @@ def convert_to_sum_states(Q):
 
 if __name__ == "__main__":
     alpha = 0.618
-    n_sims = 1000000
+    n_sims = 10000
     printall = False
 
-    Q, avg_reward, state_count = learn_Q(env, n_sims, alpha, init_val = 0.0)
+    Q, avg_reward, state_count = learn_Q(env, n_sims, alpha, epsilon = 0.05, init_val = 0.0)
     print("Number of explored states: " + str(len(Q)))
     print("Cumulative avg. reward = " + str(avg_reward))
     #print("Cumulative avg. reward = " + str(avg_reward))
