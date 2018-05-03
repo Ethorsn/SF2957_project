@@ -9,7 +9,7 @@ deck_values = np.array([x for x in range(1, 11)])
 
 
 def sum_player_hand(hand):
-    return np.dot(deck_values, hand) if hand[0] == 0 else sum_with_ace(hand)
+    return np.dot(deck_values, hand) + 10 * usable_ace(hand)
 
 def sum_with_ace(hand):
     hand_sum = np.dot(deck_values, hand)
