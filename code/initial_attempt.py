@@ -33,8 +33,11 @@ obs_space_n = 32 * 11 * 2
 
 def learn_Q(env, n_sims, alpha,
             init_val = 0.0, epsilon = 0.05,
-            Q_init = dict()):
-    Q = Q_init
+            Q_init = None):
+    if Q_init is None:
+        Q = defaultdict(lambda: np.zeros(env.action_space.n) + init_val)
+    else:
+        Q = Q_init
     state_count = defaultdict(int)
 
     avg_reward = 0.0
@@ -46,22 +49,14 @@ def learn_Q(env, n_sims, alpha,
         state = env.reset()
         state_count[state] += 1
         while not done:
-            if state not in Q:
-                # Initialize Q and take an action uniformly at random
-                Q[state] = np.zeros(env.action_space.n) + init_val
-                action = env.action_space.sample()
+            if state in Q and random.random() > epsilon:
+                # Take the best possible action
+                action = np.argmax(Q[state])
             else:
-                if random.random() > epsilon:
-                    # Take the best possible action
-                    action = np.argmax(Q[state])
-                else:
-                    # Take a random action
-                    action = env.action_space.sample()
+                # Take a random action
+                action = env.action_space.sample()
             # Draw the next state and reward of previous action
             state2, action_reward, done, info = env.step(action)
-            # If we haven't seen the new state before, initialize it for Q
-            if state2 not in Q:
-                Q[state2] = np.zeros(env.action_space.n) + init_val
 
             # Update Q, state and episode reward
             Q[state][action] += alpha * (action_reward + np.max(Q[state2]) - Q[state][action])
