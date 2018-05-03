@@ -7,12 +7,16 @@ from math import inf
 deck = np.array([1,2,3,4,5,6,7,8,9,10,10,10,10])
 deck_values = np.array([x for x in range(1, 11)])
 
+
 def sum_player_hand(hand):
     return np.dot(deck_values, hand) if hand[0] == 0 else sum_with_ace(hand)
 
 def sum_with_ace(hand):
     hand_sum = np.dot(deck_values, hand)
     return hand_sum if not hand_sum + 10 <= 21 else hand_sum + 10
+
+def usable_ace(hand):
+    return hand[0] == 1 and np.dot(deck_values, hand) + 10 <= 21
 
 def is_player_bust(hand):
     return sum_player_hand(hand) > 21
@@ -50,8 +54,9 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
         # Flag to payout 1.5 on a "natural" blackjack win, like casino rules
         # Ref: http://www.bicyclecards.com/how-to-play/blackjack/
         self.natural = natural
+        self.decks = decks # number of decks
         # Start the first game
-        self.reset(decks)
+        self.reset()
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -72,12 +77,12 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
                 reward = 1.5
         return self._get_obs(), reward, done, {}
 
-    def construct_deck(self, decks):
-        self.cards_in_deck = {x: decks for x in deck_values}
+    def construct_deck(self):
+        self.cards_in_deck = {x: self.decks for x in deck_values}
         # since we are looking at deck_values: 10, knight, queen, king
         # are valued equally. Update the last element such that we have 4 times
         # as many cards
-        self.cards_in_deck[10] = decks*4
+        self.cards_in_deck[10] = self.decks * 4
 
     def subtract_card_from_deck(self, card):
         if self.cards_in_deck[card] > 1:
@@ -111,8 +116,8 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
     def _get_obs(self):
         return (tuple(self.player), self.dealer[0])
 
-    def reset(self, decks):
-        self.construct_deck(decks)
+    def reset(self):
+        self.construct_deck()
         self.dealer = [self.draw_dealer_hand(self.np_random)]
         self.player = self.draw_player_hand(self.np_random)
         return self._get_obs()
