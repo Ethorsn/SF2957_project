@@ -65,7 +65,7 @@ def learn_Q(env, n_sims, alpha,
             episode_reward += action_reward
 
         if episode % (n_sims // 100) == 0:
-            print('Avg. reward after {} episodes: {}'.format(episode,avg_reward))
+            print('Avg. reward after {} episodes: {}'.format(episode, avg_reward))
 
         # Game is over
         avg_reward += (episode_reward - avg_reward) / (episode + 1)
@@ -103,7 +103,7 @@ def convert_to_sum_states(Q):
 
 if __name__ == "__main__":
     alpha = 0.618
-    n_sims = 10000
+    n_sims = 100000
     printall = False
 
     Q, avg_reward, state_count = learn_Q(env, n_sims, alpha, epsilon = 0.05, init_val = 0.0)
@@ -114,8 +114,12 @@ if __name__ == "__main__":
     sum_Q = convert_to_sum_states(Q)
     print("Number of explored sum states: " + str(len(sum_Q)))
 
-    V_10k = mc_prediction(lambda x: Q_policy(x, Q), sum_env, 10000)
-    plotting.plot_value_function(V_10k, title="10,000 Steps")
+    V_10k = mc_prediction(lambda x: Q_policy(x, Q), env, 10000)
+    plotting.plot_value_function(convert_to_sum_states(V_10k),
+                                 title="10,000 Steps")
+
+    V_500k = mc_prediction(lambda x: Q_policy(x, Q), env, 500000)
+    plotting.plot_value_function(convert_to_sum_states(V_500k), title="500,000 Steps")
 
 
     if printall:
