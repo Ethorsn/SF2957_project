@@ -41,15 +41,18 @@ def learn_Q(env, n_sims, alpha,
     state_count = defaultdict(int)
 
     avg_reward = 0.0
+    eps_decay = 1.0
 
     for episode in range(1,n_sims + 1):
+        if episode > (n_sims // 10):
+            eps_decay = 1 / episode
         done = False
         action_reward = 0.0
         episode_reward = 0.0
         state = env.reset()
         state_count[state] += 1
         while not done:
-            if state in Q and random.random() > epsilon:
+            if state in Q and random.random() > epsilon * eps_decay:
                 # Take the best possible action
                 action = np.argmax(Q[state])
             else:
@@ -81,9 +84,13 @@ def print_Q(Q):
                 key[0], key[1],round(value[0], 2), round(value[1], 2)))
 
 def Q_policy(state, Q):
-    return np.argmax(Q[state])
+    if state in Q:
+        return np.argmax(Q[state])
+    return env.action_space.sample()
 
-def convert_to_sum_states(Q):
+def convert_to_sum_states(Q,
+                          fill_missing = True,
+                          default_value = np.array([0, 0])):
     S = dict()
     n = defaultdict(int)
     for state, action_values in Q.items():
@@ -97,13 +104,22 @@ def convert_to_sum_states(Q):
             n[sum_state] += 1
         else:
             S[sum_state] = action_values
+    if fill_missing:
+        for player_sum in range(1, 22):
+            for dealer_sum in range(1, 11):
+                state0 = (player_sum, dealer_sum, False)
+                state1 = (player_sum, dealer_sum, True)
+                if state0 not in S:
+                    S[state0] = default_value
+                if state1 not in S:
+                    S[state1] = default_value
     return S
 
 
 
 if __name__ == "__main__":
     alpha = 0.618
-    n_sims = 100000
+    n_sims = 1000000
     printall = False
 
     Q, avg_reward, state_count = learn_Q(env, n_sims, alpha, epsilon = 0.05, init_val = 0.0)
@@ -111,15 +127,17 @@ if __name__ == "__main__":
     print("Cumulative avg. reward = " + str(avg_reward))
     #print("Cumulative avg. reward = " + str(avg_reward))
 
-    sum_Q = convert_to_sum_states(Q)
+    sum_Q_nofill = convert_to_sum_states(Q, fill_missing = False)
+    sum_Q_fill = convert_to_sum_states(Q, fill_missing = False)
     print("Number of explored sum states: " + str(len(sum_Q)))
+    print("Unexplored sum_states)
 
     V_10k = mc_prediction(lambda x: Q_policy(x, Q), env, 10000)
-    plotting.plot_value_function(convert_to_sum_states(V_10k),
-                                 title="10,000 Steps")
+    V_10k_sum = convert_to_sum_states(V_10k, False, 0)
+    plotting.plot_value_function(V_10k_sum, title="10,000 Steps")
 
-    V_500k = mc_prediction(lambda x: Q_policy(x, Q), env, 500000)
-    plotting.plot_value_function(convert_to_sum_states(V_500k), title="500,000 Steps")
+    #V_500k = mc_prediction(lambda x: Q_policy(x, Q), env, 500000)
+    #plotting.plot_value_function(convert_to_sum_states(V_500k), title="500,000 Steps")
 
 
     if printall:
