@@ -11,6 +11,7 @@ import plotting as pl
 from collections import defaultdict
 from mc_prediction import mc_prediction
 import random
+import matplotlib
 
 
 matplotlib.style.use('ggplot')
@@ -122,22 +123,31 @@ if __name__ == "__main__":
     n_sims = 1000000
     printall = False
 
-    Q, avg_reward, state_count = learn_Q(env, n_sims, alpha, epsilon = 0.05, init_val = 0.0)
+    Q, avg_reward, state_count = learn_Q(env, 
+                                         n_sims, 
+                                         alpha, 
+                                         epsilon = 0.05, 
+                                         init_val = 0.0)
     print("Number of explored states: " + str(len(Q)))
     print("Cumulative avg. reward = " + str(avg_reward))
     #print("Cumulative avg. reward = " + str(avg_reward))
 
-    sum_Q_nofill = convert_to_sum_states(Q, fill_missing = False)
-    sum_Q_fill = convert_to_sum_states(Q, fill_missing = True)
-    print("Number of explored sum states: " + str(len(sum_Q_nofill)))
-    print("Unexplored sum_states: " + str(len(sum_Q_fill) - len(sum_Q_nofill)))
+    sumQ_nofill = convert_to_sum_states(Q, fill_missing = False)
+    sumQ_fill = convert_to_sum_states(Q, fill_missing = True)
+    print("Number of explored sum states: " + str(len(sumQ_nofill)))
+    print("Unexplored sum_states: " + str(len(sumQ_fill) - len(sumQ_nofill)))
 
-    V_10k = mc_prediction(lambda x: Q_policy(x, Q), env, 10000)
-    V_10k_sum = convert_to_sum_states(V_10k, True, 0)
-    plotting.plot_value_function(V_10k_sum, title="10,000 Steps")
+    V10k = mc_prediction(lambda x: Q_policy(x, Q), env, 10000)
+    V10k_sum = convert_to_sum_states(V10k, True, 0)
+    V10k_sumfilt = {state: V10k_sum[state] for state in V10k_sum if state[0] > 11}
 
-    #V_500k = mc_prediction(lambda x: Q_policy(x, Q), env, 500000)
-    #plotting.plot_value_function(convert_to_sum_states(V_500k), title="500,000 Steps")
+    pl.plot_value_function(V10k_sumfilt, title="10,000 Steps")
+
+    V500k = mc_prediction(lambda x: Q_policy(x, Q), env, 500000)
+    V500k_sum = convert_to_sum_states(V10k, True, 0)
+    V500k_sumfilt = {state: V500k_sum[state] for state in V500k_sum if state[0] > 11}
+    
+    pl.plot_value_function(V500k_sumfilt, title="500,000 Steps")
 
 
     if printall:
