@@ -3,26 +3,31 @@
 
 import blackjack as bjk
 import numpy as np
+import pandas as pd
 from collections import defaultdict
 import random
 
 
 
-def learn_Q(env,
-            n_sims,
-            alpha,
-            init_val = 0.0,
-            epsilon = 0.05,
-            Q_init = None):
+def learn_Q(env, n_sims, alpha, init_val = 0.0, epsilon = 0.05, Q_init = None, episode_file=None):
+    """
+    
+    """
+    
     if Q_init is None:
         Q = defaultdict(lambda: np.zeros(env.action_space.n) + init_val)
     else:
         Q = Q_init
+        
     state_count = defaultdict(int)
-
     avg_reward = 0.0
     eps_decay = 1.0
-
+    
+    # if we want to save the episode reward to a file, 
+    if episode_file:
+        f = open(episode_file, "w+")
+        f.write("episode, episode_reward")
+        
     for episode in range(1,n_sims + 1):
         if episode > (n_sims // 10):
             eps_decay = 1 / episode
@@ -46,10 +51,15 @@ def learn_Q(env,
             state = state2
             state_count[state] += 1
             episode_reward += action_reward
-
+            
+        # append to the file which we want to save to 
+        if f:
+            f.write(episode, episode_reward)
+            
         if episode % (n_sims // 100) == 0:
             print('Avg. reward after {} episodes: {}'.format(episode, avg_reward))
-
+        
+        
         # Game is over
         avg_reward += (episode_reward - avg_reward) / (episode + 1)
 
@@ -57,8 +67,7 @@ def learn_Q(env,
 
 
 def print_Q(Q):
-    for key, value in sorted(Q.items(),
-                             key = lambda x: (x[0][0], (x[0][1]))):
+    for key, value in sorted(Q.items(), key = lambda x: (x[0][0], (x[0][1]))):
         if bjk.sum_player_hand(key[0]) <= 21:
             print('(my hand = {}, dealer upcard = {}) -> (stick = {}, hit = {})'.format(
                 key[0], key[1],round(value[0], 2), round(value[1], 2)))
