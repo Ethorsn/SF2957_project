@@ -74,7 +74,7 @@ class BlackjackEnvBase(gym.Env):
     by Sutton and Barto (1998).
     http://incompleteideas.net/sutton/book/the-book.html
     """
-    def __init__(self, decks, seed, natural=False):
+    def __init__(self, decks, seed, natural=True):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
             spaces.Discrete(32),

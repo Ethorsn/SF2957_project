@@ -23,16 +23,16 @@ if __name__ == "__main__":
         os.makedirs(directory)
     path_fun = lambda x: "{}/{}_{}.txt".format(directory,x, decks)
     # set seed
-    seed = 321
+    seed = 31233
     # init envs.
     env = bjk.BlackjackEnvExtend(decks = decks, seed=seed)
     sum_env = bjk_base.BlackjackEnvBase(decks = decks, seed=seed)
 
     # init constants
     alpha = 0.618
-    n_sims = 100000
+    n_sims = 10000000
     printall = False
-    epsilon = 0.05
+    epsilon = 0.5
     init_val = 0.0
     # Q-learning with "correct" state representation
     start_time_expanded = time.time()
