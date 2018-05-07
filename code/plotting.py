@@ -7,12 +7,12 @@ from collections import namedtuple
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
-
 
 def plot_value_function(V, title="Value Function"):
     """
     Plots the value function as a surface plot.
+    
+    code copied from: https://github.com/dennybritz/reinforcement-learning/blob/master/lib/plotting.py
     """
     min_x = min(k[0] for k in V.keys())
     max_x = max(k[0] for k in V.keys())
@@ -45,39 +45,35 @@ def plot_value_function(V, title="Value Function"):
 
 
 
-def plot_episode_stats(stats, smoothing_window=10, noshow=False):
-    # Plot the episode length over time
-    fig1 = plt.figure(figsize=(10,5))
-    plt.plot(stats.episode_lengths)
-    plt.xlabel("Episode")
-    plt.ylabel("Episode Length")
-    plt.title("Episode Length over Time")
-    if noshow:
-        plt.close(fig1)
-    else:
-        plt.show(fig1)
+def plot_avg_reward_episode(path, env_types, ndecks):
+    """
+    Function which plots the average return over episodes 
+    
+    path: path to the folder where the data resides
+    env_types: list with the env types you want to plot
+    ndecks: a list with the decks that you want to plot
+    save_path: optional path of where to save the fig.
+    """
+    def load_df(path, env_type, ndecks):
+        assert env_type in ["hand", "sum"]
+        path_to_file = "{}/{}_state_{}.txt".format(path, env_type, ndecks)
+        df = pd.read_table(path_to_file, sep=",")
+        df['env_type'] = env_type
+        df['ndecks'] = ndecks 
+        return df
 
-    # Plot the episode reward over time
-    fig2 = plt.figure(figsize=(10,5))
-    rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
-    plt.plot(rewards_smoothed)
-    plt.xlabel("Episode")
-    plt.ylabel("Episode Reward (Smoothed)")
-    plt.title("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
-    if noshow:
-        plt.close(fig2)
-    else:
-        plt.show(fig2)
+    df_l = []
+    for env in env_types:
+        for deck in ndecks:
+            df_l.append(load_df(path, env, deck))
+    df = pd.concat(df_l)
 
-    # Plot time steps and episode number
-    fig3 = plt.figure(figsize=(10,5))
-    plt.plot(np.cumsum(stats.episode_lengths), np.arange(len(stats.episode_lengths)))
-    plt.xlabel("Time Steps")
-    plt.ylabel("Episode")
-    plt.title("Episode per time step")
-    if noshow:
-        plt.close(fig3)
-    else:
-        plt.show(fig3)
+    fig, ax = plt.subplots(figsize=(8,6))
+    lab= []
+    for label, df in df.groupby(["env_type", "ndecks"]):
+        lab.append(label)
+        ax.plot(df['episode'], df['avg_reward'], label=label)
 
-    return fig1, fig2, fig3
+    ax.legend(title="(State space, ndecks)", loc='upper center', bbox_to_anchor=(0.5, -0.1),
+              shadow=False, ncol=2, framealpha=0.0)
+    return fig

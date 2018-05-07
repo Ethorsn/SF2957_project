@@ -1,4 +1,4 @@
-import gym.envs.toy_text.blackjack as bj
+import blackjack_base as bj
 import gym.spaces as spaces
 import numpy as np
 from gym.utils import seeding
@@ -35,13 +35,13 @@ def is_natural(hand):
     # A hand is a natural blackjack if it has 2 cars which total 21
     return True if sum(hand) == 2 & sum_player_hand(hand) == 21 else False
 
-class BlackjackEnvExtend(bj.BlackjackEnv):
+class BlackjackEnvExtend(bj.BlackjackEnvBase):
     """
     Class which extends OpenAI BlackJackEnv class such that it is a proper
-    Markov decision process.
+    stationary Markov decision process.
 
-    Observation space is expanded, the player now sees the number of cards
-    it is holding of each type.
+    Observation space is expanded, the agent now sees the number of cards
+    it is holding at each state.
     """
     def __init__(self, decks = inf, seed=3232, natural=True):
         self.action_space = spaces.Discrete(2)
@@ -77,29 +77,6 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
                 reward = 1.5
         return self._get_obs(), reward, done, {}
 
-    def construct_deck(self):
-        self.cards_in_deck = {x: self.decks for x in deck_values}
-        # since we are looking at deck_values: 10, knight, queen, king
-        # are valued equally. Update the last element such that we have 4 times
-        # as many cards
-        self.cards_in_deck[10] = self.decks * 4
-
-    def subtract_card_from_deck(self, card):
-        if self.cards_in_deck[card] > 1:
-        # if there is more than one card left, subtract it!
-            self.cards_in_deck[card] -= 1
-        else:
-            # if there is exactly one card left, than after it is used we
-            # remove the key, thus we cannot draw the card again
-            self.cards_in_deck.pop(card)
-
-    def draw_card(self, np_random):
-        # we can only draw cards which are in the keys of cards_in_deck.
-        card = int(np_random.choice(list(self.cards_in_deck.keys())))
-        # subtract the card from the deck
-        self.subtract_card_from_deck(card)
-        return card
-
     def draw_player_hand(self, np_random):
         hand = np.zeros(len(deck_values), int)
         hand[self.draw_card(np_random) - 1] += 1
@@ -121,3 +98,4 @@ class BlackjackEnvExtend(bj.BlackjackEnv):
         self.dealer = [self.draw_dealer_hand(self.np_random)]
         self.player = self.draw_player_hand(self.np_random)
         return self._get_obs()
+
