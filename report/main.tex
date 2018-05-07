@@ -1,0 +1,34 @@
+\documentclass[12pt,a4paper,notitlepage,oneside]{article}
+
+\include{header}
+
+\tolerance=5000
+
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+
+
+\usepackage{authblk}
+\title{Q-Learning and Blackjack}
+\author[1]{Benjamin Allévius}
+\author[1]{Sebastian Rosengren}
+\author[1]{Erik Thorsén}
+\affil[1]{Department of Mathematics, Stockholm University, Sweden}
+\date{\vspace{-5ex}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract} 
+  \input{abstract}  
+\end{abstract}
+\thispagestyle{empty}
+\clearpage
+\setcounter{page}{1}
+\input{theory}
+\input{implementation}
+\input{results}
+\bibliographystyle{apalike}
+\bibliography{references}
+\end{document}
