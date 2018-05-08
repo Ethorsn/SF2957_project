@@ -1,0 +1,128 @@
+
+
+
+
+\section{Introduction}
+
+The purpose of this project is to use reinforcement learning to train an \textit{agent} to play blackjack and investigate the learning capabilities of the framework. 
+We implement two different representations of the state space, one of which, albeit intuitive, does not satisfy the model's stationarity assumptions. In comparing the two different representations we investigate the importance of the stationarity assumption. We apply these state representations and reinforcement learning to different versions of blackjack --- namely difference in how many decks of cards that are used, from a finite number to infinite.
+
+
+\section*{Reinforcement Learning}
+Reinforcement learning is, as many things are in machine learning, both the problems and solutions pertaining to a specific domain. The problem is how an \textit{agent} ought to act in an \textit{environment} with imperfect information and randomness, but with feedback. The solutions are many, but most common is the Markov decision process approach.
+ 
+\subsection*{Markov Decision Process}
+Markov decision processes (MDP) is the formalism  which allows us to reason about reinforcement learning in a mathematical way, and all standard reinforcement learning problems are formulated in a Markov decision process framework. We start by giving the definition to the simplest case of a \textit{stationary} Markov decision process.
+
+The building blocks of a Markov decision process consist of
+\begin{enumerate}[(i)]
+	\item  $S$ a finite space of \textit{states}
+	\item  $A$ a finite space of \textit{actions}
+	\item  $R$ a finite space of \textit{rewards}
+	\item  $P_a(s,s')$ a transition probability function defined for all  $(s,a,s') \in S\times A \times S$
+	\item  $r(s,a)$ the immediate or expected immediate reward of taking action $a$ in state $s$.
+	\item  $\gamma \in [0,1]$, the discount factor (here always equal to 1).
+\end{enumerate}
+Let  $\{(S_t,A_t, R_{t+1}),\ t\geq 0  \}$ be a stochastic process, where $S_t \in S$ is the state of the system at time $t$; $A_t \in A$ is the (potentially random) action taken at time $t$, and $R_t \in R$ is the immediate reward at time $t$.
+The \textit{history} $H_t$ of the system up to time $t$ is the random vector given by $(S_0, A_0, S_1, A_1, \ldots,S_{t-1}, A_{t-1}, S_t )$.
+An important concept going further is that of a policy: 
+a policy $\pi = (\pi_0, \pi_1,\ldots)$ is a sequence of decision rules, where $\pi_n$ is a function of the history of the process up to time $n$ (i.e. $H_n$) mapping to a probability measure over $A$.
+
+Now, we call the process $\{(S_t,A_t, R_{t+1}),\ t\geq 0  \}$ a Markov decision process if
+\begin{multline}
+\label{MDP}
+	\mathbb{P}(S_t = s|  S_{t-1} = s_{t-1}, A_{t-1} = a_{t-1},\ldots, S_0 = s_0, A_0 = a_0   ) \\
+	= \mathbb{P}(S_t = s|  S_{t-1} = s_{t-1}, A_{t-1} = a_{t-1}  ) = P_a (s_{t-1},s)
+\end{multline}
+and $R_{t+1}$ given $s_t,a_t$ is independent of $H_t$, with $\mathbb{E}(R_{t+1} | H_t) = r(S_t,A_t)$. The process is called stationary since the transition probabilities nor the reward kernel depends on $t$.
+
+At first glance expression \eqref{MDP} makes sense, but there are subtle details which need to be addressed. For instance, we have said nothing about the process $\{A_t \}$ and therefore we should be careful defining conditional probabilities containing it. However, if $\{A_t \}$ is governed by a policy $\pi = (\pi_0,\pi_1,\ldots)$ then we can define the above probability. In order for $\{(S_t,A_t, R_{t+1}),\ t\geq 0  \}$ to be a Markov decision process we formally require that \eqref{MDP} holds for all policies. For a thorough treatment of Markov decision processes see \cite{Puterman}.
+
+The goal of reinforcement learning is to take a MDP and choose a policy which maximizes expected (discounted) rewards. This can seem hopeless since policy decisions in general depends on the whole history of the chain. However, it can be shown that for finite stationary MDPs this is equivalent to maximizing rewards over policies which take into account only the current state of the process and which maps this to a single action, i.e. $\pi_n(H_n) = \pi (S_t)\in A$ --- this is know as a \textit{stationary Markov policy}. This is something that make the optimizing problem considerably easier, and allows e.g. the \textit{Q-learning} algorithm to give estimates that converges to the optimal solution. Hence, from here on out we consider only stationary Markov policies.
+
+
+For a given policy $\pi$ define the \textit{value function}
+\begin{align*}
+	V^{\pi}(s) = \mathbb{E}_{\pi}( \sum_{n=0}^{\infty} R_{t+1} | S_0 = s)
+\end{align*}
+i.e. the expected reward obtained when following policy $\pi$. If $s_t$ is an \textit{terminal} state --- a state from which the process never leaves --- we take $R_{t+1} = 0$, which implies that $V^{\pi}(s) = 0$ if $s$ is terminal.
+
+We say that a policy $\pi^*$ is optimal if 
+\begin{align*}
+	V^{\pi^*}(s) \geq V^{\pi}(s)\qquad \forall s \text{ and policies }\pi.
+\end{align*}
+It can be shown that for finite Markov decision processes such a policy exists uniquely. Under the optimal policy $\pi^*$ let $V^*(s) = V^{\pi^*}(s)$.
+Say we know $V^*(s)$ for all $s$, can this be used to calculate an optimal policy? The answer is yes. One can prove that
+\begin{align*}
+	V^*(s) =  r(s, \pi^*(s)) + \sum_{s'} P_{\pi^*(s)}(s,s')V^*(s') = \max_{a \in A} ( r(s, a) + \sum_{s'} P_{a}(s,s')V^*(s') ).
+\end{align*}
+The equations are known as the \textit{Bellman equations} and they can be used to show that $\pi^*(s)$ is given by the action $a$ which achieves the above maximum. So if we can find a way to calculate the optimal value function we get the optimal strategy. In small state spaces the value function can actually be calculated but in large spaces approximation is the best one can hope for.
+
+\subsection*{Q-Learning}
+Q-learning is an algorithm which can be used to approximate the optimal value function and corresponding strategy. Here we will assume that the underlying MDP is terminal.
+
+In order to specify the algorithm we need some definitions. Define the \textit{action-value function} as
+\begin{align*}
+	Q^{\pi} ( s,a  ) = r(s,a) + \sum_{s'} P_{a}(s,s')V^{\pi}(s').
+\end{align*}
+That is the expected reward of starting in state $s$ taking action $a$ and then following the policy $\pi$. For terminal states $s$ we set $Q(s,a)=0$ for all $a\in A$. Furthermore, define the optimal action-value function as
+\begin{align*}
+Q^*  ( s,a  ) =  (r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s'))
+\end{align*}
+i.e. the expected reward of being in state $s$ taking action $a$ and then following the optimal policy $\pi^*$. We see that $\max_{a \in A} Q^*(s,a) = V^*(s)$, and 
+with the same argument as above $\pi^*(s) = \max_{a \in A}Q^*(s,a)$. 
+
+We can now specify the Q-learning algorithm:
+
+\begin{enumerate}[(i)]
+	\item Initialize $Q(s,a)$ for all $s,a$, learning rate $\alpha_t(s,a) \in (0,1)$, and decide on some policy e.g. $\epsilon$-greedy.
+	\item Repeat for each $N$ episodes (start $\to$ final state): \\
+	While $s_t$ not terminal:  $Q(s_t,a_t)  \leftarrow (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t)( r_t + \max_{a \in A} Q(s_{t+1},a) )$
+\end{enumerate}
+It is known that for stationary finite Markov decision process (and some additional assumptions) the Q-learning produces estimates converging to the optimal action-value function.
+
+
+\section*{Blackjack as a Markov Decision Process}
+In order to test this reinforcement learning framework we have chosen to work with the simplest form of Black Jack. We assume the following setup:
+
+\begin{itemize}
+	\item One player against the dealer, with player staking one unit on each hand;
+	\item two actions possible: ask for another card, or stay;
+	\item cards 2-10 counts as their numerical value, suites counts as 10, and ace counts as either 1 or 11 depending on whichever is best. If an ace can be counted as 11 without player going bust it is known as a \textit{usable} ace, the same goes for the dealer.
+\end{itemize}
+The goal of the player is to beat the dealer in one of the following ways
+\begin{itemize}
+	\item Get 21 points on the first two cards, knows as a blackjack, without a dealer blackjack, \textbf{net profit}: 1.5 times stake;
+	\item Reach a final score higher than the dealer without exceeding 21,\textbf{ net profit}: stake;
+	\item Dealer gets points exceeding 21 and player does not, \textbf{net profit}: stake.
+\end{itemize}
+The house always plays according to the same strategy: draw cards until it has a card sum greater than or equal to 17. The game starts with the dealer giving the player two cards (visible) and himself two cards (one visible, one hidden). The player is then allowed to take actions until done, after which the dealer follows his strategy until done. If player's points exceeds 21 his stake is lost regardless of dealers outcome (this is where the house edge comes from); if player's points equals dealer's points this is a push and stake is returned to player; otherwise payout is made according to above rules. Standard practice is that the cards are drawn from 6-10 decks, and we implement these situations as well as when the cards are drawn from an infinite deck so that every card has same probability of being drawn at all times.
+
+\subsection*{As a Markov Decision Process}
+Next we fit the above situation in to the Markov decision process framework. We do it in two ways: one with a large state space such that all MDP model assumptions are satisfied; one with a smaller state space,
+where the resulting process is  no longer stationary. In both cases actions and rewards are as specified above, and we need only specify the state space in order to have the model.
+
+\subsection*{Stationary Markov Decision Process}
+We begin by noting that the color and suite of the cards does not matter, only their numerical values. We use this as the cards identifier, with aces equal to 1. We use the following representation of the state space
+\begin{align*}
+	S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d})\ s_{pi}, \in \{1,2,\ldots, 21 \}, \Sigma_{d}\in \{1,2,\ldots, 10 \} \}.
+\end{align*}
+Hence, an element of the state space is a vector of length 11, where the 10 first elements indicates the number of each card the player is holding, and the last element indicates the dealer's card sum.
+Note that a player can never hold more than 21 cards --- this would be 21 aces and after that the game necessarily terminates. At first glance this state space seems enormous, and while that is true the \textit{effective} state space is much smaller, i.e. the states which the system realistically will visit is relatively small.  Also, with this state representation it is always possible to determine if a state is terminal --- we need only check if the player or dealer is bust, or if dealer's card sum is exceeding 17. The rewards $R_1,R_2,\ldots$ follows the above payout specification, with $R_t = 0$ if $s_t$ is not terminal.
+It is also possible, albeit tedious, to calculate the transition probabilities and to show that the resulting process is a Markov decision process.
+
+\subsection*{Non-stationary Markov Decision Process}
+Most strategies in blackjack involves keeping track only of your own card sum (with some possible extensions) and not every card you are holding. Hence, it seems natural to base the state space on this observation. It is also practical to know if the player has an usable ace, so we include this in the state representation. Let
+\begin{align*}
+	S = \{  (\Sigma_p, a_p, \Sigma_d )  \}
+\end{align*}
+where $\Sigma_p,\Sigma_d$ is the card sum of the player and the dealer, and $a_p$ indicates if the player is holding a usable ace or not. This seem to be a popular representation of the state space for blackjack across the RL-community. Although, natural and popular, this representation does not yield a stationary Markov process. Consider,
+\begin{align*}
+	s_0 = (21, 1, x),\qquad s_5 = (21,1,x).
+\end{align*}
+The first situation is a blackjack and the second is not. Hence, the expected rewards of the action "staying" will differ for the two states
+\begin{align*}
+	r(s_0, \text{stay}) = 1.5 \neq r(s_5, \text{stay}). 
+\end{align*}
+For finite decks this state representation also yields non-stationary transition probabilities, however they are stationary in the infinite deck case.
+
