@@ -57,12 +57,12 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
 
             # Update Q, state and episode reward
             alpha = 1 / state_action_count[state][action] ** omega # Even-Dar & Mansour (2003)
-            Q[state][action] += alpha * (action_reward + np.max(Q[state2]) -
+            Q[state][action] += alpha * (action_reward + gamma*np.max(Q[state2]) -
                                          Q[state][action])
             state = state2
             episode_reward += action_reward
 
-        if episode % (n_sims // 100) == 0:
+        if n_sims > 1000 and episode % (n_sims // 100) == 0:
             print('Avg. reward after {} episodes: {}'.format(episode, avg_reward))
             if f:
                 # append to the file which we want to save to

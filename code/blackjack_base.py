@@ -10,10 +10,6 @@ This code extends the BlackjackEnv from openAI gym to a finite deck.
 def cmp(a, b):
     return float(a > b) - float(a < b)
 
-# 1 = Ace, 2-10 = Number cards, Jack/Queen/King = 10
-deck = [1,2,3,4,5,6,7,8,9,10,10,10,10]
-deck_values = [x for x in range(1, 11)]
-
 
 class BlackjackEnvBase(gym.Env):
     """Simple blackjack environment
@@ -46,6 +42,10 @@ class BlackjackEnvBase(gym.Env):
     by Sutton and Barto (1998).
     http://incompleteideas.net/sutton/book/the-book.html
     """
+    # 1 = Ace, 2-10 = Number cards, Jack/Queen/King = 10
+    # deck = [1,2,3,4,5,6,7,8,9,10,10,10,10]
+    deck_values = [x for x in range(1, 11)]
+
     def __init__(self, decks, seed, natural=True):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
@@ -69,7 +69,7 @@ class BlackjackEnvBase(gym.Env):
         assert self.action_space.contains(action)
         if action:  # hit: add a card to players hand and return
             self.draw_player_card()
-            if self.is_bust(self.player):
+            if self.is_player_bust():
                 self.done = True
                 reward = -1
             else:
@@ -78,14 +78,14 @@ class BlackjackEnvBase(gym.Env):
         else:  # stick: play out the dealers hand, and score
             self.done = True
             while self.dealer_show_cards() < 17:
-                self.dealer.append(self.draw_card(self.np_random))
+                self.dealer.append(self.draw_card())
             reward = self.calculate_reward()
         return self._get_obs(), reward, self.done, {}
 
     def calculate_reward(self):
         # returns the score of the table.
         if self.natural:
-            if self.is_natural(self.player) & len(self.dealer) > 2:
+            if self.is_natural() & len(self.dealer) > 2:
                 return 1.5
         return cmp(self.score_player(), self.score_dealer())
 
@@ -98,11 +98,14 @@ class BlackjackEnvBase(gym.Env):
     def score_dealer(self):
         return self.score(self.dealer)
 
-    def is_natural(self, hand):
-        return sorted(hand) == [1, 10]
+    def is_natural(self):
+        return sorted(self.player) == [1, 10]
 
     def is_bust(self, hand):
         return True if self.sum_hand(hand) > 21 else False
+
+    def is_player_bust(self):
+        return self.is_bust(self.player)
 
     def sum_hand(self, hand):
         return sum(hand)+ 10 * self.usable_ace(hand)
@@ -111,10 +114,10 @@ class BlackjackEnvBase(gym.Env):
         return 1 in hand and sum(hand) + 10 <= 21
 
     def draw_player_card(self):
-        self.player.append(self.draw_card(self.np_random))
+        self.player.append(self.draw_card())
 
     def construct_deck(self):
-        self.cards_in_deck = {x: self.decks for x in deck_values}
+        self.cards_in_deck = {x: self.decks for x in self.deck_values}
         # since we are looking at deck_values: 10, knight, queen, king
         # are valued equally. Update the last element such that we have 4 times
         # as many cards
@@ -129,25 +132,21 @@ class BlackjackEnvBase(gym.Env):
             # remove the key, thus we cannot draw the card again
             self.cards_in_deck.pop(card)
 
-    def draw_card(self, np_random):
+    def draw_card(self):
         # we can only draw cards which are in the keys of cards_in_deck.
-        card = int(np_random.choice(list(self.cards_in_deck.keys())))
+        card = int(self.np_random.choice(list(self.cards_in_deck.keys())))
         # subtract the card from the deck
         self.subtract_card_from_deck(card)
         return card
 
-    def draw_hand(self, np_random):
-        return [self.draw_card(np_random), self.draw_card(np_random)]
-
-    def seed(self, seed = None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
+    def draw_hand(self):
+        return [self.draw_card(), self.draw_card()]
 
     def reset(self):
         self.done = False
         self.construct_deck()
-        self.dealer = self.draw_hand(self.np_random)
-        self.player = self.draw_hand(self.np_random)
+        self.dealer = self.draw_hand()
+        self.player = self.draw_hand()
         return self._get_obs()
 
     def dealer_show_cards(self):

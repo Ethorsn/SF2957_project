@@ -42,7 +42,11 @@ if __name__ == "__main__":
     print("Number of explored states: " + str(len(Q)))
     print("Cumulative avg. reward = " + str(avg_reward))
     time_to_completion_expanded = time.time() - start_time_expanded
+    vals_max = max([x.max() for x in Q.values()])
+    vals_min = min([x.min() for x in Q.values()])
 
+    print(vals_max)
+    print(vals_min)
     print("----- Starting training for sum-based state space -----")
     # Q-learning with player sum state representation
     start_time_sum = time.time()
@@ -52,6 +56,11 @@ if __name__ == "__main__":
     time_to_completion_sum = time.time() - start_time_sum
     print("Number of explored states (sum states): " + str(len(sumQ)))
     print("Cumulative avg. reward = " + str(sum_avg_reward))
+    vals_max = max([x.max() for x in sumQ.values()])
+    vals_min = min([x.min() for x in sumQ.values()])
+
+    print(vals_max)
+    print(vals_min)
     print("Training time: \n " +
           "Expanded state space: {} \n Sum state space: {}".format(
               time_to_completion_expanded, time_to_completion_sum))

@@ -25,15 +25,7 @@ def player_score(hand):
     return 0 if is_player_bust(hand) else sum_player_hand(hand)
 
 # Define the following functions for consistency
-def sum_dealer_hand(hand):
-    return bj.sum_hand(hand)
 
-def dealer_score(hand):
-    return bj.score(hand)
-
-def is_natural(hand):
-    # A hand is a natural blackjack if it has 2 cars which total 21
-    return True if sum(hand) == 2 & sum_player_hand(hand) == 21 else False
 
 class BlackjackEnvExtend(bj.BlackjackEnvBase):
     """
@@ -48,7 +40,7 @@ class BlackjackEnvExtend(bj.BlackjackEnvBase):
         self.observation_space = spaces.Tuple((
         # MultiDiscrete is a vector of the number of possible values per element
                 spaces.MultiDiscrete([11,11,8,6,5,4,4,3,3,3]),
-                spaces.Discrete(11)))
+                spaces.Discrete(32)))
         self.seed(seed)
         # initialize the number of cards to have of each deck
         # Flag to payout 1.5 on a "natural" blackjack win, like casino rules
@@ -58,44 +50,40 @@ class BlackjackEnvExtend(bj.BlackjackEnvBase):
         # Start the first game
         self.reset()
 
-    def step(self, action):
-        assert self.action_space.contains(action)
-        if action:  # hit: add a card to players hand and return
-            self.player[self.draw_card(self.np_random) - 1] += 1 # Subtract 1 due to 0-based indexing
-            if is_player_bust(self.player):
-                done = True
-                reward = -1
-            else:
-                done = False
-                reward = 0
-        else:  # stick: play out the dealers hand, and score
-            done = True
-            while sum_dealer_hand(self.dealer) < 17:
-                self.dealer.append(self.draw_card(self.np_random))
-            reward = bj.cmp(player_score(self.player), dealer_score(self.dealer))
-            if self.natural and is_natural(self.player) and reward == 1:
-                reward = 1.5
-        return self._get_obs(), reward, done, {}
+    def is_natural(self):
+        # A hand is a natural blackjack if it has 2 cars which total 21
+        return sum(self.player) == 2 and self.sum_player_hand() == 21
 
-    def draw_player_hand(self, np_random):
-        hand = np.zeros(len(deck_values), int)
-        hand[self.draw_card(np_random) - 1] += 1
-        hand[self.draw_card(np_random) - 1] += 1
+    def is_player_bust(self):
+        return self.sum_player_hand() > 21
+
+    def score_player(self):
+        return 0 if self.is_player_bust() else self.sum_player_hand()
+
+    def sum_player_hand(self):
+        return np.dot(self.deck_values, self.player) + \
+                10 * self.usable_player_ace()
+
+    def usable_player_ace(self):
+        return self.player[0] > 0 and \
+                np.dot(self.deck_values, self.player) + 10 <= 21
+
+    def draw_player_card(self):
+        self.player[self.draw_card() - 1] +=1
+
+    def draw_player_hand(self):
+        hand = np.zeros(len(self.deck_values), int)
+        hand[self.draw_card() - 1] += 1
+        hand[self.draw_card() - 1] += 1
         return hand
 
-    def draw_dealer_hand(self, n):
-        return self.draw_card(n)
-
-    def seed(self, seed = None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
-
     def _get_obs(self):
-        return (tuple(self.player), self.dealer[0])
+        return (tuple(self.player), self.dealer_show_cards())
 
     def reset(self):
+        self.done = False
         self.construct_deck()
-        self.dealer = [self.draw_dealer_hand(self.np_random)]
-        self.player = self.draw_player_hand(self.np_random)
+        self.dealer = self.draw_hand()
+        self.player = self.draw_player_hand()
         return self._get_obs()
 
