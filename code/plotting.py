@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 def plot_value_function(V, title="Value Function"):
     """
     Plots the value function as a surface plot.
-    
+
     code copied from: https://github.com/dennybritz/reinforcement-learning/blob/master/lib/plotting.py
     """
     min_x = min(k[0] for k in V.keys())
@@ -44,11 +44,10 @@ def plot_value_function(V, title="Value Function"):
     plot_surface(X, Y, Z_ace, "{} (Usable Ace)".format(title))
 
 
-
 def plot_avg_reward_episode(path, env_types, ndecks):
     """
-    Function which plots the average return over episodes 
-    
+    Function which plots the average return over episodes
+
     path: path to the folder where the data resides
     env_types: list with the env types you want to plot
     ndecks: a list with the decks that you want to plot
@@ -74,6 +73,8 @@ def plot_avg_reward_episode(path, env_types, ndecks):
         lab.append(label)
         ax.plot(df['episode'], df['avg_reward'], label=label)
 
-    ax.legend(title="(State space, ndecks)", loc='upper center', bbox_to_anchor=(0.5, -0.1),
+    lgd = ax.legend(title="(State space, ndecks)", loc='upper center', bbox_to_anchor=(0.5, -0.1),
               shadow=False, ncol=2, framealpha=0.0)
-    return fig
+    ax.set_xlabel("episode")
+    ax.set_ylabel("avg. reward")
+    return fig, lgd
