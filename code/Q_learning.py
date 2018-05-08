@@ -8,48 +8,58 @@ from collections import defaultdict
 import random
 
 
-def learn_Q(env, n_sims, alpha, init_val = 0.0, epsilon = 0.05, Q_init = None, 
-            episode_file=None):
+def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
+            init_val = 0.0, Q_init = None, episode_file = None):
     """
+    gamma: discount factor
+    omega: polynomial learning rate parameter (Even-Dar & Mansour, 2003)
+    epsilon: exploration probability parameter
+    init_val: initiate Q-values to something other than 0?
+    Q_init: pre-trained Q dict
+    episode_file: save ave
     """
 
+    # Can start with a previously trained Q dict
     if Q_init is None:
         Q = defaultdict(lambda: np.zeros(env.action_space.n) + init_val)
     else:
         Q = Q_init
-    state_count = defaultdict(int)
-    avg_reward = 0.0
-    eps_decay = 1.0
 
-    # if we want to save the episode reward to a file, 
+    state_action_count = defaultdict(lambda: np.zeros(env.action_space.n,
+                                                      dtype = int))
+    avg_reward = 0.0
+
+    # if we want to save the episode reward to a file,
     if episode_file:
         f = open(episode_file, "w+")
         f.write("episode,avg_reward\n")
     else:
         f = None
     for episode in range(1,n_sims + 1):
-        if episode > (n_sims // 10):
-            eps_decay = 1 / episode
         done = False
         action_reward = 0.0
         episode_reward = 0.0
         state = env.reset()
-        state_count[state] += 1
         while not done:
-            if state in Q and random.random() > epsilon * eps_decay:
-                # Take the best possible action
-                action = np.argmax(Q[state])
-            else:
+            explore = random.random() < (epsilon / (1 + state_action_count[state].sum()))
+            if state not in Q or explore:
                 # Take a random action
                 action = env.action_space.sample()
+            else:
+                # Take the best possible action
+                action = np.argmax(Q[state])
+
+            # Update the state-action count
+            state_action_count[state][action] += 1
+
             # Draw the next state and reward of previous action
             state2, action_reward, done, info = env.step(action)
 
             # Update Q, state and episode reward
+            alpha = 1 / state_action_count[state][action] ** omega # Even-Dar & Mansour (2003)
             Q[state][action] += alpha * (action_reward + np.max(Q[state2]) -
                                          Q[state][action])
             state = state2
-            state_count[state] += 1
             episode_reward += action_reward
 
         if episode % (n_sims // 100) == 0:
@@ -61,7 +71,7 @@ def learn_Q(env, n_sims, alpha, init_val = 0.0, epsilon = 0.05, Q_init = None,
         # Game is over
         avg_reward += (episode_reward - avg_reward) / (episode + 1)
 
-    return Q, avg_reward, state_count
+    return Q, avg_reward, state_action_count
 
 
 def Q_policy(state, Q, env):

@@ -29,15 +29,15 @@ if __name__ == "__main__":
     sum_env = bjk_base.BlackjackEnvBase(decks = decks, seed=seed)
 
     # init constants
-    alpha = 0.618
-    n_sims = 10000000
-    printall = False
+    omega = 0.77
+    n_sims = 10 ** 5
     epsilon = 0.5
     init_val = 0.0
+
     # Q-learning with "correct" state representation
     start_time_expanded = time.time()
-    Q, avg_reward, state_count = ql.learn_Q(
-        env, n_sims, alpha, epsilon = epsilon, init_val = init_val,
+    Q, avg_reward, state_action_count = ql.learn_Q(
+        env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
         episode_file=path_fun("hand_state"))
     print("Number of explored states: " + str(len(Q)))
     print("Cumulative avg. reward = " + str(avg_reward))
@@ -46,8 +46,8 @@ if __name__ == "__main__":
     print("----- Starting training for sum-based state space -----")
     # Q-learning with player sum state representation
     start_time_sum = time.time()
-    sumQ, sum_avg_reward, sum_state_count = ql.learn_Q(
-        sum_env, n_sims, alpha, epsilon = epsilon, init_val = init_val,
+    sumQ, sum_avg_reward, sum_state_action_count = ql.learn_Q(
+        sum_env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
         episode_file=path_fun("sum_state"))
     time_to_completion_sum = time.time() - start_time_sum
     print("Number of explored states (sum states): " + str(len(sumQ)))
