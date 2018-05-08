@@ -80,21 +80,25 @@ def Q_policy(state, Q, env):
     return env.action_space.sample()
 
 
-def convert_to_sum_states(Q, fill_missing = True,
+def convert_to_sum_states(Q, env, fill_missing = True,
                           default_value = np.array([0, 0])):
     """
     Function which convert the expanded state spce to a sum-based state space
     """
     S = dict()
     n = defaultdict(int)
+    use_ace = lambda x: x[0] > 0 and \
+                np.dot(env.deck_values, x) + 10 <= 21
+    sum_p = lambda x: np.dot(env.deck_values, x) + \
+                10 * use_ace(x)
     for state, action_values in Q.items():
-        sum_state = (bjk.sum_player_hand(state[0]),
-                     state[1],
-                     bjk.usable_ace(state[0]))
+        sum_state = (sum_p(state[0]), state[1],
+                     use_ace(state[0]))
         if sum_state[0] > 21:
             continue
         if sum_state in S:
-            S[sum_state] = (action_values + n[sum_state]  * S[sum_state]) / (n[sum_state] + 1)
+            S[sum_state] = (action_values + n[sum_state]  * S[sum_state])\
+                    / (n[sum_state] + 1)
             n[sum_state] += 1
         else:
             S[sum_state] = action_values
@@ -107,6 +111,7 @@ def convert_to_sum_states(Q, fill_missing = True,
                     S[state0] = default_value
                 if state1 not in S:
                     S[state1] = default_value
+
     return S
 
 

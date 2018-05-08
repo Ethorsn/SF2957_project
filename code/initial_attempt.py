@@ -15,59 +15,58 @@ from mc_prediction import mc_prediction
 import time
 
 if __name__ == "__main__":
-    # matplotlib.style.use('ggplot')
-    decks = inf
     directory = "{}/data".format(sys.path[0])
-
     if not os.path.exists(directory):
         os.makedirs(directory)
     path_fun = lambda x: "{}/{}_{}.txt".format(directory,x, decks)
-    # set seed
-    seed = 31233
-    # init envs.
-    env = bjk.BlackjackEnvExtend(decks = decks, seed=seed)
-    sum_env = bjk_base.BlackjackEnvBase(decks = decks, seed=seed)
-
     # init constants
     omega = 0.77
-    n_sims = 10 ** 5
+    n_sims = 10 ** 9
     epsilon = 0.5
     init_val = 0.0
 
-    # Q-learning with "correct" state representation
-    start_time_expanded = time.time()
-    Q, avg_reward, state_action_count = ql.learn_Q(
-        env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
-        episode_file=path_fun("hand_state"))
-    print("Number of explored states: " + str(len(Q)))
-    print("Cumulative avg. reward = " + str(avg_reward))
-    time_to_completion_expanded = time.time() - start_time_expanded
-    vals_max = max([x.max() for x in Q.values()])
-    vals_min = min([x.min() for x in Q.values()])
+    for decks in [1,2,8,inf]:
+        print("----- deck number equal to {} -----".format(decks))
+        # set seed
+        seed = 31233
+        # init envs.
+        env = bjk.BlackjackEnvExtend(decks = decks, seed=seed)
+        sum_env = bjk_base.BlackjackEnvBase(decks = decks, seed=seed)
 
-    print(vals_max)
-    print(vals_min)
-    print("----- Starting training for sum-based state space -----")
-    # Q-learning with player sum state representation
-    start_time_sum = time.time()
-    sumQ, sum_avg_reward, sum_state_action_count = ql.learn_Q(
-        sum_env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
-        episode_file=path_fun("sum_state"))
-    time_to_completion_sum = time.time() - start_time_sum
-    print("Number of explored states (sum states): " + str(len(sumQ)))
-    print("Cumulative avg. reward = " + str(sum_avg_reward))
-    vals_max = max([x.max() for x in sumQ.values()])
-    vals_min = min([x.min() for x in sumQ.values()])
+        # Q-learning with "correct" state representation
+        start_time_expanded = time.time()
+        Q, avg_reward, state_action_count = ql.learn_Q(
+            env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
+            episode_file=path_fun("hand_state"))
+        print("Number of explored states: " + str(len(Q)))
+        print("Cumulative avg. reward = " + str(avg_reward))
+        time_to_completion_expanded = time.time() - start_time_expanded
+        vals_max = max([x.max() for x in Q.values()])
+        vals_min = min([x.min() for x in Q.values()])
 
-    print(vals_max)
-    print(vals_min)
-    print("Training time: \n " +
-          "Expanded state space: {} \n Sum state space: {}".format(
-              time_to_completion_expanded, time_to_completion_sum))
-    """
-    n_mcsim = 10000
-    VQ = mc_prediction(lambda x: ql.Q_policy(x, Q, env), env, n_mcsim)
-    VQ_conv = ql.convert_to_sum_states(VQ, True, 0)
-    VQ_conv_filt = {state: VQ_conv[state] for state in V10k_sum if state[0] > 11}
-    pl.plot_value_function(VQ_conv_filt, title="10,000 Steps")
-    """
+        print(vals_max)
+        print(vals_min)
+        print("----- Starting training for sum-based state space -----")
+        # Q-learning with player sum state representation
+        start_time_sum = time.time()
+        sumQ, sum_avg_reward, sum_state_action_count = ql.learn_Q(
+            sum_env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
+            episode_file=path_fun("sum_state"))
+        time_to_completion_sum = time.time() - start_time_sum
+        print("Number of explored states (sum states): " + str(len(sumQ)))
+        print("Cumulative avg. reward = " + str(sum_avg_reward))
+        vals_max = max([x.max() for x in sumQ.values()])
+        vals_min = min([x.min() for x in sumQ.values()])
+
+        print(vals_max)
+        print(vals_min)
+        print("Training time: \n " +
+              "Expanded state space: {} \n Sum state space: {}".format(
+                  time_to_completion_expanded, time_to_completion_sum))
+
+    # n_mcsim = 10000
+    # VQ = mc_prediction(lambda x: ql.Q_policy(x, Q, env), env, n_mcsim)
+    #VQ_conv = ql.convert_to_sum_states(Q, env)
+    #VQ_conv_filt = {state: VQ_conv[state] for state in VQ_conv.keys() if \
+    #                state[0] > 11 and state[1] < 11}
+    #pl.plot_value_function(VQ_conv_filt, title="10,000 Steps")
