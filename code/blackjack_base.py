@@ -6,41 +6,13 @@ from gym.utils import seeding
 This code extends the BlackjackEnv from openAI gym to a finite deck.
 """
 
+
 def cmp(a, b):
     return float(a > b) - float(a < b)
 
 # 1 = Ace, 2-10 = Number cards, Jack/Queen/King = 10
 deck = [1,2,3,4,5,6,7,8,9,10,10,10,10]
 deck_values = [x for x in range(1, 11)]
-
-def draw_card(np_random):
-    return int(np_random.choice(deck))
-
-
-def draw_hand(np_random):
-    return [draw_card(np_random), draw_card(np_random)]
-
-
-def usable_ace(hand):  # Does this hand have a usable ace?
-    return 1 in hand and sum(hand) + 10 <= 21
-
-
-def sum_hand(hand):  # Return current hand total
-    if usable_ace(hand):
-        return sum(hand) + 10
-    return sum(hand)
-
-
-def is_bust(hand):  # Is this hand a bust?
-    return sum_hand(hand) > 21
-
-
-def score(hand):  # What is the score of this hand (0 if bust)
-    return 0 if is_bust(hand) else sum_hand(hand)
-
-
-def is_natural(hand):  # Is this hand a natural blackjack?
-    return sorted(hand) == [1, 10]
 
 
 class BlackjackEnvBase(gym.Env):
@@ -78,7 +50,7 @@ class BlackjackEnvBase(gym.Env):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
             spaces.Discrete(32),
-            spaces.Discrete(11),
+            spaces.Discrete(32),
             spaces.Discrete(2)))
         self.seed(seed)
 
@@ -96,21 +68,50 @@ class BlackjackEnvBase(gym.Env):
     def step(self, action):
         assert self.action_space.contains(action)
         if action:  # hit: add a card to players hand and return
-            self.player.append(self.draw_card(self.np_random))
-            if is_bust(self.player):
-                done = True
+            self.draw_player_card()
+            if self.is_bust(self.player):
+                self.done = True
                 reward = -1
             else:
-                done = False
+                self.done = False
                 reward = 0
         else:  # stick: play out the dealers hand, and score
-            done = True
-            while sum_hand(self.dealer) < 17:
-                self.dealer.append(draw_card(self.np_random))
-            reward = cmp(score(self.player), score(self.dealer))
-            if self.natural and is_natural(self.player) and reward == 1:
-                reward = 1.5
-        return self._get_obs(), reward, done, {}
+            self.done = True
+            while self.dealer_show_cards() < 17:
+                self.dealer.append(self.draw_card(self.np_random))
+            reward = self.calculate_reward()
+        return self._get_obs(), reward, self.done, {}
+
+    def calculate_reward(self):
+        # returns the score of the table.
+        if self.natural:
+            if self.is_natural(self.player) & len(self.dealer) > 2:
+                return 1.5
+        return cmp(self.score_player(), self.score_dealer())
+
+    def score(self, hand):  # What is the score of this hand (0 if bust)
+        return 0 if self.is_bust(hand) else self.sum_hand(hand)
+
+    def score_player(self):
+        return self.score(self.player)
+
+    def score_dealer(self):
+        return self.score(self.dealer)
+
+    def is_natural(self, hand):
+        return sorted(hand) == [1, 10]
+
+    def is_bust(self, hand):
+        return True if self.sum_hand(hand) > 21 else False
+
+    def sum_hand(self, hand):
+        return sum(hand)+ 10 * self.usable_ace(hand)
+
+    def usable_ace(self, hand):  # Does this hand have a usable ace?
+        return 1 in hand and sum(hand) + 10 <= 21
+
+    def draw_player_card(self):
+        self.player.append(self.draw_card(self.np_random))
 
     def construct_deck(self):
         self.cards_in_deck = {x: self.decks for x in deck_values}
@@ -143,11 +144,19 @@ class BlackjackEnvBase(gym.Env):
         return [seed]
 
     def reset(self):
+        self.done = False
         self.construct_deck()
-        self.dealer = [self.draw_card(self.np_random)]
+        self.dealer = self.draw_hand(self.np_random)
         self.player = self.draw_hand(self.np_random)
         return self._get_obs()
 
+    def dealer_show_cards(self):
+        if self.done:
+            return self.sum_hand(self.dealer)
+        else:
+            return self.dealer[0]
+
     def _get_obs(self):
-        return (sum_hand(self.player), self.dealer[0], usable_ace(self.player))
+        return (self.sum_hand(self.player), self.dealer_show_cards(),
+                self.usable_ace(self.player))
 
