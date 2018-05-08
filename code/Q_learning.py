@@ -41,7 +41,7 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
         episode_reward = 0.0
         state = env.reset()
         while not done:
-            explore = random.random() < (epsilon / state_count[state].sum())
+            explore = random.random() < (epsilon / state_action_count[state].sum())
             if state not in Q or explore:
                 # Take a random action
                 action = env.action_space.sample()
