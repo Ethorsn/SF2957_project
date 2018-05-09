@@ -8,10 +8,10 @@ The purpose of this project is to use reinforcement learning to train an \textit
 We implement two different representations of the state space, one of which, albeit intuitive, does not satisfy the model's stationarity assumptions. In comparing the two different representations we investigate the importance of the stationarity assumption. We apply these state representations and reinforcement learning to different versions of blackjack---namely difference in how many decks of cards that are used, from a finite number to infinite.
 
 
-\section*{Reinforcement Learning}
+\section{Reinforcement Learning}
 Reinforcement learning is, as many things are in machine learning, both the problems and solutions pertaining to a specific domain. The problem is how an \textit{agent} ought to act in an \textit{environment} with imperfect information and randomness, but with feedback. The solutions are many, but most common is the Markov decision process approach.
  
-\subsection*{Markov Decision Process}
+\subsection{Markov Decision Process} \label{sec:MDP}
 Markov decision processes (MDP) is the formalism  which allows us to reason about reinforcement learning in a mathematical way, and all standard reinforcement learning problems are formulated in a Markov decision process framework. We start by giving the definition to the simplest case of a \textit{stationary} Markov decision process.
 
 The building blocks of a Markov decision process consist of
@@ -60,7 +60,7 @@ Say we know $V^*(s)$ for all $s$, can this be used to calculate an optimal polic
 \end{align}
 The equations are known as the \textit{Bellman equations} and they can be used to show that $\pi^*(s)$ is given by the action $a$ which achieves the above maximum. So if we can find a way to calculate the optimal value function we get the optimal strategy. In small state spaces the value function can actually be calculated but in large spaces approximation is the best one can hope for.
 
-\subsection*{Q-Learning}
+\subsection{Q-Learning} \label{sec:Qtheory}
 Q-learning is an algorithm which can be used to approximate the optimal value function and corresponding strategy. Here we will assume that the underlying MDP is terminal.
 
 In order to specify the algorithm we need some definitions. Define the \textit{action-value function} as
@@ -81,13 +81,13 @@ We can now specify the Q-learning algorithm:
 	\item Repeat for each $N$ episodes (start $\to$ final state): \\
 	While $s_t$ not terminal:  
 	\begin{align} \label{eq:Qupdate}
-          Q(s_t,a_t)  \leftarrow (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t)( r_t + \max_{a \in A} Q(s_{t+1},a) )
+          Q(s_t,a_t)  \leftarrow (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t)( r_{t+1} + \max_{a \in A} Q(s_{t+1},a) )
         \end{align}
 \end{enumerate}
 It is known that for stationary finite Markov decision process (and some additional assumptions) the Q-learning produces estimates converging to the optimal action-value function.
 
 
-\section*{Blackjack as a Markov Decision Process}
+\section{Blackjack as a Markov Decision Process} \label{sec:bjMDP}
 In order to test this reinforcement learning framework we have chosen to work with the simplest form of Black Jack. We assume the following setup:
 
 \begin{itemize}
@@ -103,12 +103,12 @@ The goal of the player is to beat the dealer in one of the following ways
 \end{itemize}
 The house always plays according to the same strategy: draw cards until it has a card sum greater than or equal to 17. The game starts with the dealer giving the player two cards (visible) and himself two cards (one visible, one hidden). The player is then allowed to take actions until done, after which the dealer follows his strategy until done. If player's points exceeds 21 his stake is lost regardless of dealers outcome (this is where the house edge comes from); if player's points equals dealer's points this is a push and stake is returned to player; otherwise payout is made according to above rules. Standard practice is that the cards are drawn from 6--10 decks, and we implement these situations as well as when the cards are drawn from an infinite deck so that every card has same probability of being drawn at all times.
 
-\subsection*{As a Markov Decision Process}
+\subsection{As a Markov Decision Process}
 Next we fit the above situation in to the Markov decision process framework. We do it in two ways: one with a large state space such that all MDP model assumptions are satisfied; 
 one with a smaller state space,
 where the resulting process is  no longer stationary. In both cases actions and rewards are as specified above, and we need only specify the state space in order to have the model.
 
-\subsection*{Stationary Markov Decision Process}
+\subsection{Stationary Markov Decision Process} \label{sec:stationaryMDP}
 We begin by noting that the color and suite of the cards does not matter, only their numerical values. We use this as the cards identifier, with aces equal to 1. We use the following representation of the state space
 \begin{align*}
 	S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d}) \, | \, i (s_{pi} - 1) \leq 21 \text { for }i=1,\ldots,10, \text{ and } \Sigma_{d} \leq 26 \}.
@@ -123,7 +123,7 @@ Also, with this state representation it is always possible to determine if a sta
 exceeds 17. The rewards $R_1,R_2,\ldots$ follows the above payout specification, with $R_t = 0$ if $s_t$ is not terminal.
 It is also possible, albeit tedious, to calculate the transition probabilities and to show that the resulting process is a Markov decision process.
 
-\subsection*{Non-stationary Markov Decision Process}
+\subsection{Non-stationary Markov Decision Process} \label{sec:nonstationaryMDP}
 Most strategies in blackjack involves keeping track only of your own card sum (with some possible extensions) and not every card you are holding. 
 Hence, it seems natural to base the state space on this observation. It is also practical to know if the player has an usable ace, so we include this in the state representation. 
 Let
