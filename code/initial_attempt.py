@@ -64,14 +64,25 @@ if __name__ == "__main__":
               "Expanded state space: {} \n Sum state space: {}".format(
                   time_to_completion_expanded, time_to_completion_sum))
 
+    # Directory to save plots in
+    plot_dir = "{}../figures/".format(sys.path[0])
+
     # Convert Q (extended state) to sum state representation and make 3D plots
     Q_conv = ql.convert_to_sum_states(Q, env)
     V_conv = ql.convert_to_value_function(Q_conv)
     V_conv_filt = ql.fill_missing_sum_states(ql.filter_states(V_conv))
-    pl.plot_value_function(V_conv_filt, title = str(n_sims) + " simulations")
+    pl.plot_value_function(V_conv_filt,
+                           title = "Expanded state, " + str(decks) + " decks",
+                           directory = plot_dir,
+                           file_name = "3D_exp_" + str(decks) + "_decks.png")
 
     # Likewise make 3D plots for sumQ
     V_sum = ql.convert_to_value_function(sumQ)
     V_sum_filt = ql.fill_missing_sum_states(ql.filter_states(V_sum))
-    pl.plot_value_function(V_sum_filt, title = str(n_sims) + " simulations")
+    pl.plot_value_function(V_sum_filt,
+                           title = "Sum state, " + str(decks) + " decks",
+                           directory = plot_dir,
+                           file_name = "3D_sum_" + str(decks) + "_decks.png")
+
+
 
