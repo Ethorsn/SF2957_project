@@ -50,3 +50,26 @@ $\epsilon_t(s_t) = \frac{c}{\#[(s=s_t)]}$ for some positive constant $c \leq 1$,
 such as Boltzmann exploration exist \citep{RLDP}.
 
 \subsection{Software implementation} \label{sec:software}
+Our initial idea for implementing a Q-learning algorithm for Blackjack was to find a pre-existing code base that
+could simulate a Blackjack environment, enabling us to focus mostly on the reinforcement learning aspect of
+the project. AI Gym (\url{https://gym.openai.com/}) is ``a toolkit for developing and comparing reinforcement learning 
+algorithms'', which can be installed as a Python library and which offers a simple Blackjack environment---indeed,
+seemingly the same environment as that in \citet{Sutton2018}. In this version of Blackjack, cards are dealt from
+an infinite deck and one is provided the state representation 
+$(\text{player sum},\text{dealer's 1 showing card}, \text{player has usable ace})$, much like that described
+in Section \ref{sec:nonstationaryMDP}. On closer inspection of the source code, however, we found that this
+environment was lacking.
+With only the (first) visible card representing the dealer in any state, some state transitions will go 
+from one state (call it $s$) to itself when the episode ends (and a reward is given). This means that some terminal
+states are missing, and further that the action `hit' may be permissible at the first entry into $s$ but not
+the subsequent one. For these reasons, $Q(s,a)$ will be given an erroneous value in its updates for these states. 
+We also found the infinite deck setting to be less interesting, 
+since it makes counting cards impossible\todo{Insert joke about the movie 21 or the MIT Blackjack Team}.
+
+Thus, a somewhat large effort was put into improving the Blackjack environment class from AI Gym. We replaced the
+dealer's first visible card in the state representation by the dealer's visible card sum, made it possible to
+have an integer number of decks in addition to infinitely many, and also made some other smaller changes.
+These changes were made with inheritance in mind, as our next effort was spent on making a subclass of this
+base class; the subclass implementing the extended state space discussed in \ref{sec:stationaryMDP}.
+We have made our implementation publicly available at \url{https://github.com/Ethorsn/SF2957_project} and
+are considering a submission (pull request) of it to AI Gym. 
