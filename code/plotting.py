@@ -9,7 +9,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_value_function(V, title="Value Function",
-                        directory = None, file_name = None):
+                        directory = None, file_name = None,
+                        show = False):
     """
     Plots the value function as a surface plot.
 
@@ -41,7 +42,8 @@ def plot_value_function(V, title="Value Function",
         fig.colorbar(surf)
         if file_name:
             plt.savefig(directory + usable_ace + file_name, bbox_inces = 'tight')
-        plt.show()
+        if show:
+            plt.show()
 
     plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title),
                  usable_ace = "noace_")
