@@ -77,7 +77,7 @@ with the same argument as above $\pi^*(s) = \max_{a \in A}Q^*(s,a)$.
 We can now specify the Q-learning algorithm:
 
 \begin{enumerate}[(i)]
-	\item Initialize $Q(s,a)$ for all $s,a$, learning rate $\alpha_t(s,a) \in (0,1)$, and decide on some policy e.g. $\epsilon$-greedy.
+	\item Initialize $Q(s,a)$ for all $s,a$, learning rate $\alpha_t(s,a) \in (0,1]$, and decide on some policy e.g. $\epsilon$-greedy.
 	\item Repeat for each $N$ episodes (start $\to$ final state): \\
 	While $s_t$ not terminal:  
 	\begin{align} \label{eq:Qupdate}
