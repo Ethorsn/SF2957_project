@@ -65,7 +65,7 @@ if __name__ == "__main__":
                   time_to_completion_expanded, time_to_completion_sum))
 
     # Directory to save plots in
-    plot_dir = "{}../figures/".format(sys.path[0])
+    plot_dir = "{}/../figures/".format(sys.path[0])
 
     # Convert Q (extended state) to sum state representation and make 3D plots
     Q_conv = ql.convert_to_sum_states(Q, env)
