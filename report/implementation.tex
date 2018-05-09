@@ -1,1 +1,52 @@
-\section{Implementation}
+\section{Implementation} \label{sec:implementation}
+In implementing a Q-learning algorithm for Blackjack, we face a number of choices.
+First, as discussed in Sections \ref{sec:stationaryMDP} and \ref{sec:nonstationaryMDP}, is the choice of state space.
+Second, the parameters $\alpha$ and $\epsilon$ of the algorithm, which may be functions of the current state $s$ and
+the action $a$. Third, the implementation itself---how do we implement the algorithm in code? The first and third points
+are interconnected here, so we deal with the second point first, then the other two.
+
+\subsection{Parameter choices for Blackjack Q-learning} \label{sec:paramchoices}
+The (possibly) state- and action-dependent learning rate $\alpha_t(s, a) \in (0, 1]$ determines to what extent we update 
+the $Q$ function each time we visit state $s$ and take action $a$. A small $\alpha_t$ means that $Q$ changes slowly
+from its initial value (which is an additional parameter to choose), and a larger $\alpha_t$ means that we put more
+emphasis on the immediate (well, at $t+1$) reward and currently optimal action of the state $s'$ we transition to.
+%
+Intuitively, our estimate of $Q(s,a)$ should improve with the number of times we have visited $s$ and taken action $a$,
+meaning that it becomes less important to update the function in this state-action pair. Vice versa, in state-action pairs
+we have not encountered many times before, our estimate of the function value is uncertain, and we should put more emphasis
+on the reward we received for taking action $a$, as well as the currently known best action out of the state $s'$ we transition to.
+For our Blackjack setup, we may note again that the immediate rewards are 0 in all states except for a terminal state, 
+in which case the function $Q$ is defined to be zero. Thus, the update rule \ref{eq:Qupdate} becomes
+% \footnotesize
+\begin{align} \label{eq:bjQupdate}
+          Q(s_t,a_t)  \leftarrow 
+          \begin{cases}
+            (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t) r_{t+1}, &s_{t+1} \text{ terminal} \\
+            (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t) \, \underset{a \in A}{\max} Q(s_{t+1},a), &s_{t+1} \text{ non-terminal}. \\
+          \end{cases}
+\end{align}
+% \normalsize 
+
+A choice of $\alpha_t(s_t,a_t)$ that has the intuitive properties mentioned above is $\alpha_t(s_t,a_t) = \#[(s=s_t,a=a_t)]^{-1}$,
+i.e.\ the reciprocal of the number of times action $a = a_t$ has been taken in state $s=s_t$. This choice of $\alpha_t$ satisfies
+the convergence criteria $\sum_t \alpha_t(s_t,a_t) = \infty$ and $\sum_t \alpha^2_t(s_t,a_t) < \infty$ outlined in e.g.\ 
+\citet{Watkins1992}. Further investigation shows that one can do better than this when the function $Q$ is updated 
+asynchronously, i.e.\ one $(s,a)$-pair at a time. \citet{EvenDar2003} show that in this case, the optimal choice is 
+$\alpha_t(s_t,a_t) = \#[(s=s_t,a=a_t)]^{-\omega}$, where $\omega \approx 0.77$. This is the choice of $\alpha_t$ we choose,
+although it should be noted that the scenario considered by \citet{EvenDar2003} included a discount factor $\gamma < 1$.
+
+Another important choice in implementing Q-learning is the choice of policy---what action should we take in a given state? 
+Under certain conditions, our learned $Q$ will eventually guide us to the optimal policy, but this is not the case initially.
+If we used the greedy policy of always choosing the action $a$ with the highest value of $Q$ when in state $s$, an unlucky
+start may lead us to never explore some states and find (approximately) the true value $Q^*(s,a)$ for all actions $a$ 
+available when in state $s$---some perhaps more valuable than the greedy action chosen. Indeed, the second condition for 
+convergence to $Q^*$ is that all pairs $(s, a)$ are visited infinitely often, asymptotically \citep{RLDP}.
+Commonly, this is done by choosing a random action with some small probability $\epsilon$, rather than choosing the greedy action.
+Again, it is reasonable that if we have visited a given state $s$ many times, and also taken all actions our of this state
+many times, our estimate $Q(s,a)$ for all actions $a$ available in $s$ should be fairly certain. Thus, there is less need to
+choose a random action; we may go with the greedy choice with a high probability. There are several ways of implementing such
+$\epsilon\text{-\emph{decay}}$. We choose the rather simple option of choosing a random action when in state $s_t=s$ with probability 
+$\epsilon_t(s_t) = \frac{c}{\#[(s=s_t)]}$ for some positive constant $c \leq 1$, though it should be noted that more advanced options 
+such as Boltzmann exploration exist \citep{RLDP}.
+
+\subsection{Software implementation} \label{sec:software}
