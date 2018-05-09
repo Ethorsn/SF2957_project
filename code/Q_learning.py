@@ -96,8 +96,7 @@ def fill_missing_sum_states(D, default_value = 0):
     return S
 
 
-def convert_to_sum_states(Q, env, fill_missing = True,
-                          default_value = np.array([0, 0])):
+def convert_to_sum_states(Q, env):
     """
     Function which convert the expanded state spce to a sum-based state space
     """
@@ -124,13 +123,3 @@ def convert_to_value_function(Q):
         S[state] = action_values.max()
     return S
 
-
-"""
-def print_Q(Q):
-    for key, value in sorted(Q.items(), key = lambda x: (x[0][0], (x[0][1]))):
-        if bjk.sum_player_hand(key[0]) <= 21:
-            print('(my hand = {}, dealereupcard = {}) -> ' +
-                  '(stick = {}, hit = {})'.format(key[0], key[1],
-                                                  round(value[0], 2),
-                                                  round(value[1], 2)))
-"""

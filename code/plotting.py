@@ -26,8 +26,10 @@ def plot_value_function(V, title="Value Function",
     X, Y = np.meshgrid(x_range, y_range)
 
     # Find value for all (x, y) coordinates
-    Z_noace = np.apply_along_axis(lambda _: V[(_[0], _[1], False)], 2, np.dstack([X, Y]))
-    Z_ace = np.apply_along_axis(lambda _: V[(_[0], _[1], True)], 2, np.dstack([X, Y]))
+    Z_noace = np.apply_along_axis(lambda _: V[(_[0], _[1], False)], 2,
+                                  np.dstack([X, Y]))
+    Z_ace = np.apply_along_axis(lambda _: V[(_[0], _[1], True)], 2,
+                                np.dstack([X, Y]))
 
     def plot_surface(X, Y, Z, title, usable_ace):
         fig = plt.figure(figsize=(20, 10))
@@ -41,9 +43,9 @@ def plot_value_function(V, title="Value Function",
         ax.view_init(ax.elev, -120)
         fig.colorbar(surf)
         if file_name:
-            plt.savefig(directory + usable_ace + file_name, bbox_inces = 'tight')
+            fig.savefig(directory + usable_ace + file_name, bbox_inces = 'tight')
         if show:
-            plt.show()
+            fig.show()
 
     plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title),
                  usable_ace = "noace_")
@@ -80,7 +82,8 @@ def plot_avg_reward_episode(path, env_types, ndecks):
         lab.append(label)
         ax.plot(df['episode'], df['avg_reward'], label=label)
 
-    lgd = ax.legend(title="(State space, ndecks)", loc='upper center', bbox_to_anchor=(0.5, -0.1),
+    lgd = ax.legend(title="(State space, ndecks)", loc='upper center',
+                    bbox_to_anchor=(0.5, -0.1),
               shadow=False, ncol=2, framealpha=0.0)
     ax.set_xlabel("episode")
     ax.set_ylabel("avg. reward")

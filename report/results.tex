@@ -53,8 +53,7 @@ Surprisingly, the training time for the hand state space is much larger than tha
  \caption{The number of explored states $\hat{S}$ and the training time $t$ (seconds) for a given number of decks in play and its respective state space. The number of simulations was set to $10^7$.\label{tab:state_visited}}
 \end{table}
 
-We are also interested in the 
-
+Since estimates of Q-learning will converge to the true optimal value-action function we would like to visualize these said values. As previously stated, the cardinality of the hand poses a problem. Hence, we will impose a (somewhat arbitrary) aggregation scheme in order to compare the performance of the algorithm on the two spaces. Each state of $S_{hand}$ will be transformed to a sum of the card values of that hand and if the ace was usable or not. We will take a simple average of the q-values when doing so. We have now received the results from the algorithm to the same representation as the sum state space. Then, we take the maximum value of the two $q$-values corresponding to different action values of that state. In Figure \ref{fig:q_vals_states} we have visualised the aggregated q-values for the hand state and the sum states.
 \begin{figure}[htp]
 \centering
  \begin{subfigure}[b]{0.48\textwidth}
@@ -67,5 +66,5 @@ We are also interested in the
    % .: 0x0 pixel, 0dpi, 0.00x0.00 cm, bb=
    \caption{Avg. return with 2 decks\label{sfig:3Dfignd8}}
  \end{subfigure}
-\caption{The average return of an $\epsilon$-greedy Q-learning algorithm for TEST different state spaces. \label{fig:avg_return}}
+\caption{The average return of an $\epsilon$-greedy Q-learning algorithm for TEST different state spaces. \label{fig:q_vals_states}}
 \end{figure}
