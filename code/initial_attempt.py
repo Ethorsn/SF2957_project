@@ -64,9 +64,14 @@ if __name__ == "__main__":
               "Expanded state space: {} \n Sum state space: {}".format(
                   time_to_completion_expanded, time_to_completion_sum))
 
-    # n_mcsim = 10000
-    # VQ = mc_prediction(lambda x: ql.Q_policy(x, Q, env), env, n_mcsim)
-    #VQ_conv = ql.convert_to_sum_states(Q, env)
-    #VQ_conv_filt = {state: VQ_conv[state] for state in VQ_conv.keys() if \
-    #                state[0] > 11 and state[1] < 11}
-    #pl.plot_value_function(VQ_conv_filt, title="10,000 Steps")
+    # Convert Q (extended state) to sum state representation and make 3D plots
+    Q_conv = ql.convert_to_sum_states(Q, env)
+    V_conv = ql.convert_to_value_function(Q_conv)
+    V_conv_filt = ql.fill_missing_sum_states(ql.filter_states(V_conv))
+    pl.plot_value_function(V_conv_filt, title = str(n_sims) + " simulations")
+
+    # Likewise make 3D plots for sumQ
+    V_sum = ql.convert_to_value_function(sumQ)
+    V_sum_filt = ql.fill_missing_sum_states(ql.filter_states(V_sum))
+    pl.plot_value_function(V_sum_filt, title = str(n_sims) + " simulations")
+

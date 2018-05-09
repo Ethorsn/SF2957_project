@@ -79,6 +79,22 @@ def Q_policy(state, Q, env):
         return np.argmax(Q[state])
     return env.action_space.sample()
 
+def filter_states(S):
+    return {k: v for k, v in S.items() if type(k) == tuple and \
+            k[0] > 11 and k[0] < 22 and k[1] < 11}
+
+def fill_missing_sum_states(D, default_value = 0):
+    S = D
+    for player_sum in range(12, 22):
+            for dealer_sum in range(1, 11):
+                state0 = (player_sum, dealer_sum, False)
+                state1 = (player_sum, dealer_sum, True)
+                if state0 not in S:
+                    S[state0] = default_value
+                if state1 not in S:
+                    S[state1] = default_value
+    return S
+
 
 def convert_to_sum_states(Q, env, fill_missing = True,
                           default_value = np.array([0, 0])):
@@ -94,24 +110,18 @@ def convert_to_sum_states(Q, env, fill_missing = True,
     for state, action_values in Q.items():
         sum_state = (sum_p(state[0]), state[1],
                      use_ace(state[0]))
-        if sum_state[0] > 21:
-            continue
         if sum_state in S:
             S[sum_state] = (action_values + n[sum_state]  * S[sum_state])\
                     / (n[sum_state] + 1)
             n[sum_state] += 1
         else:
             S[sum_state] = action_values
-    if fill_missing:
-        for player_sum in range(1, 22):
-            for dealer_sum in range(1, 11):
-                state0 = (player_sum, dealer_sum, False)
-                state1 = (player_sum, dealer_sum, True)
-                if state0 not in S:
-                    S[state0] = default_value
-                if state1 not in S:
-                    S[state1] = default_value
+    return S
 
+def convert_to_value_function(Q):
+    S = dict()
+    for state, action_values in Q.items():
+        S[state] = action_values.max()
     return S
 
 
