@@ -105,7 +105,7 @@ where the resulting process is  no longer stationary. In both cases actions and 
 \subsection*{Stationary Markov Decision Process}
 We begin by noting that the color and suite of the cards does not matter, only their numerical values. We use this as the cards identifier, with aces equal to 1. We use the following representation of the state space
 \begin{align*}
-	S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d})\ s_{pi}, \in \{1,2,\ldots, 21 \}, \Sigma_{d}\in \{1,2,\ldots, 10 \} \}.
+	S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d})\, s_{pi} \in \{1,2,\ldots, 21 \}, \Sigma_{d}\in \{1,2,\ldots, 10 \} \}.
 \end{align*}
 Hence, an element of the state space is a vector of length 11, where the 10 first elements indicates the number of each card the player is holding, and the last element indicates the dealer's card sum.
 Note that a player can never hold more than 21 cards --- this would be 21 aces and after that the game necessarily terminates. At first glance this state space seems enormous, and while that is true the \textit{effective} state space is much smaller, i.e. the states which the system realistically will visit is relatively small.  Also, with this state representation it is always possible to determine if a state is terminal --- we need only check if the player or dealer is bust, or if dealer's card sum is exceeding 17. The rewards $R_1,R_2,\ldots$ follows the above payout specification, with $R_t = 0$ if $s_t$ is not terminal.
