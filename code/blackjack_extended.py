@@ -4,28 +4,6 @@ import numpy as np
 from gym.utils import seeding
 from math import inf
 
-deck = np.array([1,2,3,4,5,6,7,8,9,10,10,10,10])
-deck_values = np.array([x for x in range(1, 11)])
-
-
-def sum_player_hand(hand):
-    return np.dot(deck_values, hand) + 10 * usable_ace(hand)
-
-def sum_with_ace(hand):
-    hand_sum = np.dot(deck_values, hand)
-    return hand_sum if not hand_sum + 10 <= 21 else hand_sum + 10
-
-def usable_ace(hand):
-    return hand[0] > 0 and np.dot(deck_values, hand) + 10 <= 21
-
-def is_player_bust(hand):
-    return sum_player_hand(hand) > 21
-
-def player_score(hand):
-    return 0 if is_player_bust(hand) else sum_player_hand(hand)
-
-# Define the following functions for consistency
-
 
 class BlackjackEnvExtend(bj.BlackjackEnvBase):
     """
