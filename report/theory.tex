@@ -5,7 +5,7 @@
 \section{Introduction}
 
 The purpose of this project is to use reinforcement learning to train an \textit{agent} to play blackjack and investigate the learning capabilities of the framework. 
-We implement two different representations of the state space, one of which, albeit intuitive, does not satisfy the model's stationarity assumptions. In comparing the two different representations we investigate the importance of the stationarity assumption. We apply these state representations and reinforcement learning to different versions of blackjack --- namely difference in how many decks of cards that are used, from a finite number to infinite.
+We implement two different representations of the state space, one of which, albeit intuitive, does not satisfy the model's stationarity assumptions. In comparing the two different representations we investigate the importance of the stationarity assumption. We apply these state representations and reinforcement learning to different versions of blackjack---namely difference in how many decks of cards that are used, from a finite number to infinite.
 
 
 \section*{Reinforcement Learning}
@@ -42,9 +42,9 @@ The goal of reinforcement learning is to take a MDP and choose a policy which ma
 
 
 For a given policy $\pi$ define the \textit{value function}
-\begin{align*}
+\begin{align} \label{eq:Vfun}
 	V^{\pi}(s) = \mathbb{E}_{\pi}( \sum_{n=0}^{\infty} R_{t+1} | S_0 = s)
-\end{align*}
+\end{align}
 i.e. the expected reward obtained when following policy $\pi$. If $s_t$ is an \textit{terminal} state --- a state from which the process never leaves --- we take $R_{t+1} = 0$, which implies that $V^{\pi}(s) = 0$ if $s$ is terminal.
 
 We say that a policy $\pi^*$ is optimal if 
@@ -53,22 +53,24 @@ We say that a policy $\pi^*$ is optimal if
 \end{align*}
 It can be shown that for finite Markov decision processes such a policy exists uniquely. Under the optimal policy $\pi^*$ let $V^*(s) = V^{\pi^*}(s)$.
 Say we know $V^*(s)$ for all $s$, can this be used to calculate an optimal policy? The answer is yes. One can prove that
-\begin{align*}
-	V^*(s) =  r(s, \pi^*(s)) + \sum_{s'} P_{\pi^*(s)}(s,s')V^*(s') = \max_{a \in A} ( r(s, a) + \sum_{s'} P_{a}(s,s')V^*(s') ).
-\end{align*}
+\begin{align}
+	V^*(s) 
+	&=  r(s, \pi^*(s)) + \sum_{s'} P_{\pi^*(s)}(s,s')V^*(s') \\
+	&= \max_{a \in A} ( r(s, a) + \sum_{s'} P_{a}(s,s')V^*(s') ).
+\end{align}
 The equations are known as the \textit{Bellman equations} and they can be used to show that $\pi^*(s)$ is given by the action $a$ which achieves the above maximum. So if we can find a way to calculate the optimal value function we get the optimal strategy. In small state spaces the value function can actually be calculated but in large spaces approximation is the best one can hope for.
 
 \subsection*{Q-Learning}
 Q-learning is an algorithm which can be used to approximate the optimal value function and corresponding strategy. Here we will assume that the underlying MDP is terminal.
 
 In order to specify the algorithm we need some definitions. Define the \textit{action-value function} as
-\begin{align*}
+\begin{align} \label{eq:Qfun_policy}
 	Q^{\pi} ( s,a  ) = r(s,a) + \sum_{s'} P_{a}(s,s')V^{\pi}(s').
-\end{align*}
+\end{align}
 That is the expected reward of starting in state $s$ taking action $a$ and then following the policy $\pi$. For terminal states $s$ we set $Q(s,a)=0$ for all $a\in A$. Furthermore, define the optimal action-value function as
-\begin{align*}
+\begin{align} \label{eq:Qfun_optimal}
 Q^*  ( s,a  ) =  (r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s'))
-\end{align*}
+\end{align}
 i.e. the expected reward of being in state $s$ taking action $a$ and then following the optimal policy $\pi^*$. We see that $\max_{a \in A} Q^*(s,a) = V^*(s)$, and 
 with the same argument as above $\pi^*(s) = \max_{a \in A}Q^*(s,a)$. 
 
@@ -77,7 +79,10 @@ We can now specify the Q-learning algorithm:
 \begin{enumerate}[(i)]
 	\item Initialize $Q(s,a)$ for all $s,a$, learning rate $\alpha_t(s,a) \in (0,1)$, and decide on some policy e.g. $\epsilon$-greedy.
 	\item Repeat for each $N$ episodes (start $\to$ final state): \\
-	While $s_t$ not terminal:  $Q(s_t,a_t)  \leftarrow (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t)( r_t + \max_{a \in A} Q(s_{t+1},a) )$
+	While $s_t$ not terminal:  
+	\begin{align} \label{eq:Qupdate}
+          Q(s_t,a_t)  \leftarrow (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t)( r_t + \max_{a \in A} Q(s_{t+1},a) )
+        \end{align}
 \end{enumerate}
 It is known that for stationary finite Markov decision process (and some additional assumptions) the Q-learning produces estimates converging to the optimal action-value function.
 
@@ -88,39 +93,50 @@ In order to test this reinforcement learning framework we have chosen to work wi
 \begin{itemize}
 	\item One player against the dealer, with player staking one unit on each hand;
 	\item two actions possible: ask for another card, or stay;
-	\item cards 2-10 counts as their numerical value, suites counts as 10, and ace counts as either 1 or 11 depending on whichever is best. If an ace can be counted as 11 without player going bust it is known as a \textit{usable} ace, the same goes for the dealer.
+	\item cards 2--10 counts as their numerical value, suites counts as 10, and ace counts as either 1 or 11 depending on whichever is best. If an ace can be counted as 11 without player going bust it is known as a \textit{usable} ace, the same goes for the dealer.
 \end{itemize}
 The goal of the player is to beat the dealer in one of the following ways
 \begin{itemize}
-	\item Get 21 points on the first two cards, knows as a blackjack, without a dealer blackjack, \textbf{net profit}: 1.5 times stake;
-	\item Reach a final score higher than the dealer without exceeding 21,\textbf{ net profit}: stake;
-	\item Dealer gets points exceeding 21 and player does not, \textbf{net profit}: stake.
+	\item Get 21 points on the first two cards, knows as a blackjack, without a dealer blackjack. \textbf{Net profit}: 1.5 times stake;
+	\item Reach a final score higher than the dealer without exceeding 21. \textbf{Net profit}: stake;
+	\item Dealer gets points exceeding 21 and player does not. \textbf{Net profit}: stake.
 \end{itemize}
-The house always plays according to the same strategy: draw cards until it has a card sum greater than or equal to 17. The game starts with the dealer giving the player two cards (visible) and himself two cards (one visible, one hidden). The player is then allowed to take actions until done, after which the dealer follows his strategy until done. If player's points exceeds 21 his stake is lost regardless of dealers outcome (this is where the house edge comes from); if player's points equals dealer's points this is a push and stake is returned to player; otherwise payout is made according to above rules. Standard practice is that the cards are drawn from 6-10 decks, and we implement these situations as well as when the cards are drawn from an infinite deck so that every card has same probability of being drawn at all times.
+The house always plays according to the same strategy: draw cards until it has a card sum greater than or equal to 17. The game starts with the dealer giving the player two cards (visible) and himself two cards (one visible, one hidden). The player is then allowed to take actions until done, after which the dealer follows his strategy until done. If player's points exceeds 21 his stake is lost regardless of dealers outcome (this is where the house edge comes from); if player's points equals dealer's points this is a push and stake is returned to player; otherwise payout is made according to above rules. Standard practice is that the cards are drawn from 6--10 decks, and we implement these situations as well as when the cards are drawn from an infinite deck so that every card has same probability of being drawn at all times.
 
 \subsection*{As a Markov Decision Process}
-Next we fit the above situation in to the Markov decision process framework. We do it in two ways: one with a large state space such that all MDP model assumptions are satisfied; one with a smaller state space,
+Next we fit the above situation in to the Markov decision process framework. We do it in two ways: one with a large state space such that all MDP model assumptions are satisfied; 
+one with a smaller state space,
 where the resulting process is  no longer stationary. In both cases actions and rewards are as specified above, and we need only specify the state space in order to have the model.
 
 \subsection*{Stationary Markov Decision Process}
 We begin by noting that the color and suite of the cards does not matter, only their numerical values. We use this as the cards identifier, with aces equal to 1. We use the following representation of the state space
 \begin{align*}
-	S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d})\, s_{pi} \in \{1,2,\ldots, 21 \}, \Sigma_{d}\in \{1,2,\ldots, 10 \} \}.
+	S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d}) \, | \, i (s_{pi} - 1) \leq 21 \text { for }i=1,\ldots,10, \text{ and } \Sigma_{d} \leq 26 \}.
 \end{align*}
-Hence, an element of the state space is a vector of length 11, where the 10 first elements indicates the number of each card the player is holding, and the last element indicates the dealer's card sum.
-Note that a player can never hold more than 21 cards --- this would be 21 aces and after that the game necessarily terminates. At first glance this state space seems enormous, and while that is true the \textit{effective} state space is much smaller, i.e. the states which the system realistically will visit is relatively small.  Also, with this state representation it is always possible to determine if a state is terminal --- we need only check if the player or dealer is bust, or if dealer's card sum is exceeding 17. The rewards $R_1,R_2,\ldots$ follows the above payout specification, with $R_t = 0$ if $s_t$ is not terminal.
+Hence, an element of the state space is a vector of length 11, where the 10 first elements indicates the number of each card the player is holding, 
+and the last element indicates the dealer's \emph{visible} card sum.
+
+Note that for a card of value $i$, the maximum number $s$ of cards with this value the player can have is such that $n-1$ keeps the player's card sum less than or equal to 21,
+but drawing one more card will lead to a bust (assuming the player has no cards of other values). At first glance this state space seems enormous, 
+and while that is true the \textit{effective} state space is much smaller, i.e. the states which the system realistically will visit is relatively small.  
+Also, with this state representation it is always possible to determine if a state is terminal---we need only check if the player or dealer is bust, or if dealer's card sum 
+exceeds 17. The rewards $R_1,R_2,\ldots$ follows the above payout specification, with $R_t = 0$ if $s_t$ is not terminal.
 It is also possible, albeit tedious, to calculate the transition probabilities and to show that the resulting process is a Markov decision process.
 
 \subsection*{Non-stationary Markov Decision Process}
-Most strategies in blackjack involves keeping track only of your own card sum (with some possible extensions) and not every card you are holding. Hence, it seems natural to base the state space on this observation. It is also practical to know if the player has an usable ace, so we include this in the state representation. Let
+Most strategies in blackjack involves keeping track only of your own card sum (with some possible extensions) and not every card you are holding. 
+Hence, it seems natural to base the state space on this observation. It is also practical to know if the player has an usable ace, so we include this in the state representation. 
+Let
 \begin{align*}
 	S = \{  (\Sigma_p, a_p, \Sigma_d )  \}
 \end{align*}
-where $\Sigma_p,\Sigma_d$ is the card sum of the player and the dealer, and $a_p$ indicates if the player is holding a usable ace or not. This seem to be a popular representation of the state space for blackjack across the RL-community. Although, natural and popular, this representation does not yield a stationary Markov process. Consider,
+where $\Sigma_p,\Sigma_d$ is the card sum of the player and the dealer, and $a_p$ indicates if the player is holding a usable ace or not. 
+This seem to be a popular representation of the state space for blackjack across the RL-community. 
+Although natural and popular, this representation does not yield a stationary Markov process. Consider,
 \begin{align*}
 	s_0 = (21, 1, x),\qquad s_5 = (21,1,x).
 \end{align*}
-The first situation is a blackjack and the second is not. Hence, the expected rewards of the action "staying" will differ for the two states
+The first situation is a blackjack and the second is not. Hence, the expected rewards of the action ``staying'' will differ for the two states
 \begin{align*}
 	r(s_0, \text{stay}) = 1.5 \neq r(s_5, \text{stay}). 
 \end{align*}
