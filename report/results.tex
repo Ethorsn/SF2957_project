@@ -43,17 +43,17 @@ Surprisingly, the training time for the hand state space is much larger than tha
 \begin{table}[h!]
 \centering
  \begin{tabular}{c|cc|cc}
-  \# decks & $\hat{S}_{hand}$ & $t_{hand}$ & $\hat{S}_{sum}$ &  $t_{sum}$  \\
+  \# decks & $\#S_{hand}$ & $t_{hand}$ & $\#S_{sum}$ &  $t_{sum}$  \\
   \hline 
   $1$ & $7693$ & $1423.286$ & $645$ & $940.998$ \\
   $2$ & $37671$ & $1520.298$ & $686$ & $1024.545$ \\
   $8$ & $70396$ & $1526.443$ & $680$ & $1023.590$ \\
   $\inf$ & $70756$ & $1515.659$ & $676$ & $1060.511$ 
  \end{tabular} 
- \caption{The number of explored states $\hat{S}$ and the training time $t$ (seconds) for a given number of decks in play and its respective state space. The number of simulations was set to $10^7$.\label{tab:state_visited}}
+ \caption{The number of explored states $\#S$ and the training time $t$ (seconds) for a given number of decks in play and its respective state space. The number of simulations was set to $10^7$.\label{tab:state_visited}}
 \end{table}
 
-Since estimates of Q-learning will converge to the true optimal value-action function we would like to visualize these said values. As previously stated, the cardinality of the hand poses a problem. Hence, we will impose a (somewhat arbitrary) aggregation scheme in order to compare the performance of the algorithm on the two spaces. Each state of $S_{hand}$ will be transformed to a sum of the card values of that hand and if the ace was usable or not. We will take a simple average of the q-values when doing so. We have now received the results from the algorithm to the same representation as the sum state space. Then, we take the maximum value of the two $q$-values corresponding to different action values of that state. In Figure \ref{fig:q_vals_states} we have visualised the aggregated q-values for the hand state and the sum states.
+Since estimates of Q-learning will converge to the true optimal value-action function we would like to visualize these said values. As previously stated, the cardinality of the hand poses a problem. Hence, we will impose a (somewhat arbitrary) aggregation scheme in order to compare the performance of the algorithm on the two spaces. Each state of $S_{hand}$ will be transformed to a sum of the card values of that hand and if the ace was usable or not. We will take a simple average of the q-values when doing so. Post this aggregation scheme, the results from the algorithm on the hand space are on the same form as the sum's. Then, we take the maximum value of the two $q$-values corresponding to different action values of that state. In Figure \ref{fig:q_vals_states} we have visualised the aggregated q-values for the hand state and the sum states. It is clear that holding a card sum of 21 indicates a large reward. This is regardless of what the dealer is showing.
 \begin{figure}[htp]
 \centering
  \begin{subfigure}[b]{0.48\textwidth}
