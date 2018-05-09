@@ -50,7 +50,7 @@ class BlackjackEnvBase(gym.Env):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
             spaces.Discrete(32),
-            spaces.Discrete(32),
+            spaces.Discrete(26),
             spaces.Discrete(2)))
         self.seed(seed)
 

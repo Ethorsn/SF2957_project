@@ -39,8 +39,8 @@ class BlackjackEnvExtend(bj.BlackjackEnvBase):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple((
         # MultiDiscrete is a vector of the number of possible values per element
-                spaces.MultiDiscrete([11,11,8,6,5,4,4,3,3,3]),
-                spaces.Discrete(32)))
+                spaces.MultiDiscrete([12,11,8,6,5,4,4,3,3,3]),
+                spaces.Discrete(26)))
         self.seed(seed)
         # initialize the number of cards to have of each deck
         # Flag to payout 1.5 on a "natural" blackjack win, like casino rules
