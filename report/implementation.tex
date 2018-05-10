@@ -15,13 +15,12 @@ Intuitively, our estimate of $Q(s,a)$ should improve with the number of times we
 meaning that it becomes less important to update the function in this state-action pair. Vice versa, in state-action pairs
 we have not encountered many times before, our estimate of the function value is uncertain, and we should put more emphasis
 on the reward we received for taking action $a$, as well as the currently known best action out of the state $s'$ we transition to.
-For our Blackjack setup, we may note again that the immediate rewards are 0 in all states except for a terminal state, 
-in which case the function $Q$ is defined to be zero. Thus, the update rule \ref{eq:Qupdate} becomes
+For our Blackjack setup, we may note again that the immediate rewards are 0 in all states except for a terminal state, where the payout is made. By convention the function $Q$ is defined to be zero for terminal states. Thus, the update rule \ref{eq:Qupdate} becomes
 % \footnotesize
 \begin{align} \label{eq:bjQupdate}
           Q(s_t,a_t)  \leftarrow 
           \begin{cases}
-            (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t) r_{t+1}, &s_{t+1} \text{ terminal} \\
+            (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t) R_{t+1}, &s_{t+1} \text{ terminal} \\
             (1-\alpha_t(s_t,a_t))Q(s_t,a_t) + \alpha_t(s_t,a_t) \, \underset{a \in A}{\max} Q(s_{t+1},a), &s_{t+1} \text{ non-terminal}. \\
           \end{cases}
 \end{align}
