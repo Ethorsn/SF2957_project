@@ -9,7 +9,8 @@ import random
 
 
 def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
-            init_val = 0.0, Q_init = None, episode_file = None):
+            init_val = 0.0, Q_init = None, episode_file = None,
+            window=10000):
     """
     gamma: discount factor
     omega: polynomial learning rate parameter (Even-Dar & Mansour, 2003)
@@ -28,7 +29,7 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
     state_action_count = defaultdict(lambda: np.zeros(env.action_space.n,
                                                       dtype = int))
     avg_reward = 0.0
-
+    rolling_window = np.zeros(window)
     # if we want to save the episode reward to a file,
     if episode_file:
         f = open(episode_file, "w+")
@@ -41,7 +42,8 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
         episode_reward = 0.0
         state = env.reset()
         while not done:
-            explore = random.random() < (epsilon / (1 + state_action_count[state].sum()))
+            explore = random.random() < \
+                    (epsilon / (1 + state_action_count[state].sum()))
             if state not in Q or explore:
                 # Take a random action
                 action = env.action_space.sample()
@@ -62,11 +64,17 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
             state = state2
             episode_reward += action_reward
 
-        if n_sims > 1000 and episode % (n_sims // 100) == 0:
-            print('Avg. reward after {} episodes: {}'.format(episode, avg_reward))
+        if episode < window:
+            rolling_window[episode-1] = episode_reward
+        else:
+            rolling_window = np.append(rolling_window[1:], episode_reward)
+
+        if n_sims > window and episode % (n_sims // 100) == 0:
+            print('Mean of window {}, after {} episodes: {}'.format(
+                window, episode, rolling_window.mean()))
             if f:
                 # append to the file which we want to save to
-                f.write("{},{}\n".format(episode, str(avg_reward)))
+                f.write("{},{}\n".format(episode, str(rolling_window.mean())))
 
         # Game is over
         avg_reward += (episode_reward - avg_reward) / (episode + 1)
@@ -83,7 +91,7 @@ def filter_states(S):
     return {k: v for k, v in S.items() if type(k) == tuple and \
             k[0] > 11 and k[0] < 22 and k[1] < 11}
 
-def fill_missing_sum_states(D, default_value = 0):
+def fill_missing_sum_states(D, default_value = 0.0):
     S = D
     for player_sum in range(12, 22):
             for dealer_sum in range(1, 11):
@@ -110,9 +118,9 @@ def convert_to_sum_states(Q, env):
         sum_state = (sum_p(state[0]), state[1],
                      use_ace(state[0]))
         if sum_state in S:
+            n[sum_state] += 1
             S[sum_state] = (action_values + n[sum_state]  * S[sum_state])\
                     / (n[sum_state] + 1)
-            n[sum_state] += 1
         else:
             S[sum_state] = action_values
     return S

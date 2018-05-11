@@ -13,6 +13,8 @@ import os
 import plotting as pl
 from mc_prediction import mc_prediction
 import time
+import matplotlib
+matplotlib.style.use('ggplot')
 
 if __name__ == "__main__":
     directory = "{}/data".format(sys.path[0])
@@ -24,7 +26,8 @@ if __name__ == "__main__":
     n_sims = 10 ** 7
     epsilon = 0.5
     init_val = 0.0
-
+    window = n_sims//1000
+    print("----- Window of size {}".format(window))
     # Directory to save plots in
     plot_dir = "{}report/figures/".format(sys.path[0][:-4])
 
@@ -40,7 +43,7 @@ if __name__ == "__main__":
         start_time_expanded = time.time()
         Q, avg_reward, state_action_count = ql.learn_Q(
             env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
-            episode_file=path_fun("hand_state"))
+            episode_file=path_fun("hand_state"), window=window)
         print("Number of explored states: " + str(len(Q)))
         print("Cumulative avg. reward = " + str(avg_reward))
         time_to_completion_expanded = time.time() - start_time_expanded
@@ -50,7 +53,7 @@ if __name__ == "__main__":
         start_time_sum = time.time()
         sumQ, sum_avg_reward, sum_state_action_count = ql.learn_Q(
             sum_env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
-            episode_file=path_fun("sum_state"))
+            episode_file=path_fun("sum_state"), window=window)
         time_to_completion_sum = time.time() - start_time_sum
         print("Number of explored states (sum states): " + str(len(sumQ)))
         print("Cumulative avg. reward = " + str(sum_avg_reward))
@@ -76,5 +79,8 @@ if __name__ == "__main__":
                            directory = plot_dir,
                            file_name = "3D_sum_" + str(decks) + "_decks.png")
 
-
-
+        # create line plots
+        env_types = ["hand", "sum"]
+        fig, lgd = pl.plot_avg_reward_episode(directory, env_types, [str(decks)])
+        fig.savefig("{}/avgReturnEp_ndeck{}.png".format(plot_dir, decks),
+                                bbox_extra_artists=(lgd,), bbox_inches='tight')

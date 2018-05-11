@@ -6,7 +6,7 @@ We will employ a $\eps$ greedy algorithm on the two state spaces where the value
 %the sum space is a subset of the hand space we expect that the Q-learning perform better in cases when the decks are finite. 
 %To ensure that the learning algorithm explores the state space we will use an $\eps$-greedy algorithm, if not stated otherwise. The decay of the $\eps$-greedy algorithm will be linear with the number of episodes has passed one tenth of the number of simulations. As an example, if we perform $10^6$ simulations then after a fixed point the proability of taking a random action will decay by $1 / \text{episode}$. Also, the initial values of $Q(S, a)$ will be zero for all states $S$ and actions $a$. 
 
-In Figure \ref{fig:avg_return} we display the average return, by episodes, of the algorithm for different number of decks. The x-axis is scaled to a proportion of the number of simulations performed. In the top left Figure of Figure \ref{fig:avg_return}, denoted \ref{sfig:nd1}, we can see the performance of the Q-learning algorithm for 1 deck. Here, it becomes increasingly important to remember what cards that have been played. This is to be expected. When playing using one deck, there are only 4 of each card with the exception of all suites which are ten. Conditioned on the dealers outcome (where only one card is visible), the probability of seeing a arbitrary sequence of cards is relatively large for small deck sizes. However, as the deck size increases the information of what cards that are in your hand become redundant. This can be seen subsequently in Subfigures \ref{sfig:nd2}, \ref{sfig:nd8} and \ref{sfig:ndinf}. One could note that in subfigure \ref{sfig:nd2} of Figure \ref{fig:avg_return} the algorithm seem to have some reward left to accumulate. It has not yet converged. If more simulations were to be performed, the average reward of the hand might pass the sum's. 
+In Figure \ref{fig:avg_return} we display the average return, by episodes, of the algorithm for different number of decks. The x-axis is scaled to a proportion of the number of simulations performed. In the top left Figure of \ref{fig:avg_return}, denoted \ref{sfig:nd1}, we can see the performance of the Q-learning algorithm for 1 deck. Here, it becomes increasingly important to remember what cards that have been played. This is to be expected. When playing using one deck, there are only 4 of each card with the exception of all suites which are ten. Conditioned on the dealers outcome (where only one card is visible), the probability of seeing a arbitrary sequence of cards is relatively large for small deck sizes. However, as the deck size increases the information of what cards that are in the agents hand become redundant. This can be seen subsequently in Subfigures \ref{sfig:nd2}, \ref{sfig:nd8} and \ref{sfig:ndinf}. One could note that in subfigure \ref{sfig:nd2} of Figure \ref{fig:avg_return} the algorithm seem to have some reward left to accumulate. It has not yet converged. If more simulations were to be performed, the average reward of the hand might pass the sum's. 
 \begin{figure}[htp]
 \begin{tabular}{cc}
 \centering
@@ -37,15 +37,15 @@ In Figure \ref{fig:avg_return} we display the average return, by episodes, of th
 \caption{The average return of an $\epsilon$-greedy Q-learning algorithm for TEST different state spaces. \label{fig:avg_return}}
 \end{figure}
 
-Since the cardinality of the hand space is much (!) larger then the sum's, the number of states the algorithm must explore will be larger. In Table \ref{tab:state_visited} we show the number of states the algorithm has explored together with the effective training time for the specific environment and the number of decks in play. We can clearly see that the number of explored grow increasingly large for the hand state when the number of decks increases. Interestingly, the number of explored states go stay around $70 000$ when having 8 decks and an infinite amount of decks. The number of states explored by the algorithm for the sum stays almost constant when increasing the number of decks.
+Since the cardinality of the hand space is much (!) larger then the sum's, the number of states the algorithm must explore will be larger. In Table \ref{tab:state_visited} we show the number of states the algorithm has explored together with the effective training time for the specific environment and the number of decks in play. We can clearly see that the number of explored states grows large for the hand state when the number of decks increases. The number of states explored by the algorithm in the hand state space seem to converge to a certain level. As stated in section \ref{sec:stationaryMDP}, the number of effective states to be explored are not as grand as the actual state space. Hence, it is not surprising that the algorithm converge to level of states that are both necessary and valuable to explore. 
 
-Surprisingly, the training time for the hand state space is much larger than that of the sum space. By these results, there seem to be an indication that there is a $50\%$ increase in training time for the algorithm on the hand state compared to the sum. Note that the effective training time is simply the time it took to train this specific instance. It should only be interpreted as an indication of the time it takes to train one instance of the algorithm. All other measures of training time (which might be more accurate) are omitted because of the lack of computational power and time.
+The training time for the algorithm on the hand space are large compared to that of the sum's. There is an indication that there is a $50\%$ increase in training time for the algorithm on the hand state compared to the sum. Note that the effective training time is simply the time it took to train this specific instance. All other measures of training time (which might be more accurate) are omitted because of the lack of computational power and time.
 \begin{table}[h!]
 \centering
  \begin{tabular}{c|cc|cc}
   \# decks & $\#S_{hand}$ & $t_{hand}$ & $\#S_{sum}$ &  $t_{sum}$  \\
   \hline 
-  $1$ & $7693$ & $1423.286$ & $645$ & $940.998$ \\
+  $1$ & $7646$ & $9249.187$ & $645$ & $940.998$ \\
   $2$ & $37671$ & $1520.298$ & $686$ & $1024.545$ \\
   $8$ & $70396$ & $1526.443$ & $680$ & $1023.590$ \\
   $\inf$ & $70756$ & $1515.659$ & $676$ & $1060.511$ 
@@ -53,18 +53,28 @@ Surprisingly, the training time for the hand state space is much larger than tha
  \caption{The number of explored states $\#S$ and the training time $t$ (seconds) for a given number of decks in play and its respective state space. The number of simulations was set to $10^7$.\label{tab:state_visited}}
 \end{table}
 
-Since estimates of Q-learning will converge to the true optimal value-action function we would like to visualize these said values. As previously stated, the cardinality of the hand poses a problem. Hence, we will impose a (somewhat arbitrary) aggregation scheme in order to compare the performance of the algorithm on the two spaces. Each state of $S_{hand}$ will be transformed to a sum of the card values of that hand and if the ace was usable or not. We will take a simple average of the q-values when doing so. Post this aggregation scheme, the results from the algorithm on the hand space are on the same form as the sum's. Then, we take the maximum value of the two $q$-values corresponding to different action values of that state. In Figure \ref{fig:q_vals_states} we have visualised the aggregated q-values for the hand state and the sum states. It is clear that holding a card sum of 21 indicates a large reward. This is regardless of what the dealer is showing.
+Since estimates of Q-learning will converge to the true optimal value-action function we would like to visualize these said values. As previously stated, the cardinality of the hand poses a problem. Hence, we will impose a (somewhat arbitrary) aggregation scheme in order to compare the performance of the algorithm on the two spaces. Each state of $S_{hand}$ will be transformed to a sum of the card values of that hand and if the ace was usable or not. We will take a simple average of the q-values when doing so. Post this aggregation scheme, the results from the algorithm on the hand space are now on the same form as the sum's. Then, we use our policy and take the maximum value of the two $q$-values corresponding to different action values of that state. In Figure \ref{fig:3Dq-vals} we have visualised the aggregated q-values for the hand state and the sum states, for different deck sizes and given that we have a usable ace or not. Since the states where $\Sigma_d > 11$ are terminal we chose not to include them in this visualisation.
+
+It is clear that holding a card sum of 21 indicates a large reward when using our policy. This is regardless of what the dealer is showing.
+\begin{center}
 \begin{figure}[htp]
-\centering
- \begin{subfigure}[b]{0.48\textwidth}
-  	 \includegraphics[width=\textwidth]{./figures/avgReturnEp_ndeck1.png}
+  	 \includegraphics[width=1.2\textwidth]{./figures/ace_3D_exp_1_decks.png}
    % .: 0x0 pixel, 0dpi, 0.00x0.00 cm, bb=
-   \caption{Avg. return with 1 deck\label{sfig:3Dfignd6}}
- \end{subfigure}
- \begin{subfigure}[b]{0.48\textwidth}
-  	 \includegraphics[width=\textwidth]{./figures/avgReturnEp_ndeck2.png}
-   % .: 0x0 pixel, 0dpi, 0.00x0.00 cm, bb=
-   \caption{Avg. return with 2 decks\label{sfig:3Dfignd8}}
- \end{subfigure}
-\caption{The average return of an $\epsilon$-greedy Q-learning algorithm for TEST different state spaces. \label{fig:q_vals_states}}
+   \caption{q-values, 1 deck\label{sfig:3Dnd1}}
 \end{figure}
+ \begin{figure}[htp]%{\textwidth}
+  	 \includegraphics[width=1.2\textwidth]{./figures/noace_3D_exp_1_decks.png}
+   % .: 0x0 pixel, 0dpi, 0.00x0.00 cm, bb=
+   \caption{q-values, 1 deck\label{sfig:3Dnd2}}
+ \end{figure}
+ \begin{figure}[htp]%{\textwidth}
+  	 \includegraphics[width=1.2\textwidth]{./figures/ace_3D_sum_1_decks.png}
+   % .: 0x0 pixel, 0dpi, 0.00x0.00 cm, bb=
+   \caption{q-values, 1 deck \label{sfig:3Dnd3}}
+ \end{figure}
+ \begin{figure}[htp]%{\textwidth}
+  	 \includegraphics[width=1.2\textwidth]{./figures/noace_3D_sum_1_decks.png}
+   % .: 0x0 pixel, 0dpi, 0.00x0.00 cm, bb=
+   \caption{q-values, 1 deck \label{sfig:3Dnd3}}
+ \end{figure}
+\end{center}

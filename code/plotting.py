@@ -36,10 +36,10 @@ def plot_value_function(V, title="Value Function",
         ax = fig.add_subplot(111, projection='3d')
         surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
                                cmap=matplotlib.cm.coolwarm, vmin=-1.0, vmax=1.5)
-        ax.set_xlabel('Player Sum')
-        ax.set_ylabel('Dealer Showing')
-        ax.set_zlabel('Value')
-        ax.set_title(title)
+        ax.set_xlabel('Player Sum', size=22)
+        ax.set_ylabel('Dealer Showing', size=22)
+        ax.set_zlabel('Value', size=22)
+        ax.set_title(title, size=22)
         ax.view_init(ax.elev, -120)
         fig.colorbar(surf)
         if file_name:
@@ -84,7 +84,7 @@ def plot_avg_reward_episode(path, env_types, ndecks):
 
     lgd = ax.legend(title="(State space, ndecks)", loc='upper center',
                     bbox_to_anchor=(0.5, -0.1),
-              shadow=False, ncol=2, framealpha=0.0)
-    ax.set_xlabel("episode")
-    ax.set_ylabel("avg. reward")
+              shadow=False, ncol=2, framealpha=0.0, fontsize=22)
+    ax.set_xlabel("episode", size=22)
+    ax.set_ylabel("avg. reward", size=22)
     return fig, lgd
