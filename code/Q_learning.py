@@ -10,7 +10,7 @@ import random
 
 def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
             init_val = 0.0, Q_init = None, episode_file = None,
-            window=10000):
+            window=None, warmup=None):
     """
     gamma: discount factor
     omega: polynomial learning rate parameter (Even-Dar & Mansour, 2003)
@@ -29,11 +29,16 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
     state_action_count = defaultdict(lambda: np.zeros(env.action_space.n,
                                                       dtype = int))
     avg_reward = 0.0
-    rolling_window = np.zeros(window)
+    if window:
+        rolling_window = np.zeros(window)
+
     # if we want to save the episode reward to a file,
     if episode_file:
         f = open(episode_file, "w+")
-        f.write("episode,avg_reward\n")
+        if window:
+            f.write("episode, avg_reward ({} window)\n".format(window))
+        else:
+            f.write("episode, avg_reward\n")
     else:
         f = None
     for episode in range(1,n_sims + 1):
@@ -63,22 +68,32 @@ def learn_Q(env, n_sims, gamma = 1, omega = 0.77, epsilon = 0.05,
                                          Q[state][action])
             state = state2
             episode_reward += action_reward
+   
+            if window and episode < window:
+                rolling_window[episode-1] = episode_reward
+            elif window and episode >= window:
+                rolling_window = np.append(rolling_window[1:], episode_reward)
 
-        if episode < window:
-            rolling_window[episode-1] = episode_reward
-        else:
-            rolling_window = np.append(rolling_window[1:], episode_reward)
-
-        if n_sims > window and episode % (n_sims // 100) == 0:
-            print('Mean of window {}, after {} episodes: {}'.format(
-                window, episode, rolling_window.mean()))
-            if f:
-                # append to the file which we want to save to
-                f.write("{},{}\n".format(episode, str(rolling_window.mean())))
+            if warmup and episode > warmup:
+                if window:
+                    if n_sims > window and episode % (n_sims // 100) == 0:
+                        print('Mean of window {}, after {} episodes: {}'.format(
+                            window, episode, rolling_window.mean()))
+                        if f:
+                            # append to the file which we want to save to
+                            f.write("{},{}\n".format(episode, str(rolling_window.mean())))
+                else:
+                    if episode % (n_sims // 100) == 0:
+                        print('Mean after {} episodes: {}'.format(episode, avg_reward))
+                        if f:
+                            # append to the file which we want to save to
+                            f.write("{},{}\n".format(episode, str(avg_reward)))
 
         # Game is over
-        avg_reward += (episode_reward - avg_reward) / (episode + 1)
-
+        if warmup and n_sims >= warmup:
+            avg_reward += (episode_reward - avg_reward) / (episode + 1)
+        else:
+            avg_reward += (episode_reward - avg_reward) / (episode + 1)
     return Q, avg_reward, state_action_count
 
 

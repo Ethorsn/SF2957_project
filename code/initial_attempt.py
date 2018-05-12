@@ -26,15 +26,16 @@ if __name__ == "__main__":
     n_sims = 10 ** 7
     epsilon = 0.5
     init_val = 0.0
-    window = n_sims//1000
-    print("----- Window of size {}".format(window))
+    window = None
+    warmup = n_sims // 10
+    if window:
+        print("----- Window of size {}".format(window))
     # Directory to save plots in
     plot_dir = "{}report/figures/".format(sys.path[0][:-4])
 
+    seed = 31233
     for decks in [1,2,8,inf]:
         print("----- deck number equal to {} -----".format(decks))
-        # set seed
-        seed = 31233
         # init envs.
         env = bjk.BlackjackEnvExtend(decks = decks, seed=seed)
         sum_env = bjk_base.BlackjackEnvBase(decks = decks, seed=seed)
@@ -43,7 +44,7 @@ if __name__ == "__main__":
         start_time_expanded = time.time()
         Q, avg_reward, state_action_count = ql.learn_Q(
             env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
-            episode_file=path_fun("hand_state"), window=window)
+            episode_file=path_fun("hand_state"), warmup=warmup)
         print("Number of explored states: " + str(len(Q)))
         print("Cumulative avg. reward = " + str(avg_reward))
         time_to_completion_expanded = time.time() - start_time_expanded
@@ -53,7 +54,7 @@ if __name__ == "__main__":
         start_time_sum = time.time()
         sumQ, sum_avg_reward, sum_state_action_count = ql.learn_Q(
             sum_env, n_sims, omega = omega, epsilon = epsilon, init_val = init_val,
-            episode_file=path_fun("sum_state"), window=window)
+            episode_file=path_fun("sum_state"), warmup=warmup)
         time_to_completion_sum = time.time() - start_time_sum
         print("Number of explored states (sum states): " + str(len(sumQ)))
         print("Cumulative avg. reward = " + str(sum_avg_reward))
