@@ -1,4 +1,11 @@
 \section{Summary}
+
+As we saw in section \ref{sec:results} the performance of the Q-learning algorithm was no good on the expanded state space. The average return of the algorithm was always higher when it learned on the state space using the sum. The algorithm using the state space of the hand was better when 1 deck was used, which is nice but not applicable in real life when blackjack is played. 
+
+Another loss was also the increase in computational time by a factor of 50\%. This is not scalable for large experiments. It could possibly be circumvented by creating more efficient algorithms or by using another API instead of ''Gym''.  
+
+There are a number of interesting extensions to this problem. One could include several agents, playing on the same ''table''. Could the the agents then learn to interact (react) to what card the others are showing? Furthermore, the concept of counting cards is also interesting. If we introduce a memory of a general type, say the number of played cards of each type, would the agent learn how to count cards? Surely the extended state space should provide a lot more information in such a scenario. 
+
 \begin{itemize}
  \item What have we done
  \item Future work
