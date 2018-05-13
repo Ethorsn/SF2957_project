@@ -1,0 +1,23 @@
+\section{Summary} \label{sec:summary}
+For this project we have implemented a Q-learning algorithm for Blackjack, in the process
+enhancing a popular open source implementation of a Blackjack learning environment to
+support a richer state space and an arbitrary number of decks. In particular, we have shown 
+that an extended state space which stores the number of each type of card the player holds 
+leads to a decreased expected loss compared to a state which only stores the sum of the 
+values of the cards in the player's hands. In terms of the version of Blackjack played,
+further extensions to our work could make the game more realistic by adding features such
+as splitting and insurance. An extension for the Q-learning algorithm in this case may be
+to run a smaller number of training episodes using the sum-state representation.
+When running the algorithm with an extended state, then, we could initialize the Q-function
+values for a given (and previously unseen) state by the corresponding values obtained for
+the sum-state representation, simply by calculating the sum of the player's hand in the
+extended state. This may improve convergence.
+
+As a follow-up on the goals we set for this project, we note that we accomplished all of
+them: (1) we implemented a reinforcement learning algorithm (Q-learning) for Blackjack
+in (2) Python 3.6 (although we did not see an opportunity to use Tensorflow), and
+we have (3) provided a public GitHub repository with our code. However, because getting the 
+environment to work properly code-wise, we did not have time to implement our `if time permits'-goals
+of implementing more than one reinforcement learning algorithm and use an ensemble method to
+combine them.
+
