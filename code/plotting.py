@@ -46,6 +46,7 @@ def plot_value_function(V, title="Value Function",
             fig.savefig(directory + usable_ace + file_name, bbox_inces = 'tight')
         if show:
             fig.show()
+        plt.close(fig)
 
     plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title),
                  usable_ace = "noace_")
