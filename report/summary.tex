@@ -13,6 +13,11 @@ values for a given (and previously unseen) state by the corresponding values obt
 the sum-state representation, simply by calculating the sum of the player's hand in the
 extended state. This may improve convergence.
 
+Also, the inclusion of several agents in the same training environment would be a very interesting iteration.
+The agents would be playing on the same ''table'' and sharing information by viewing their respective cards. In
+this context, it would also be interesting if we could introduce a memory to the player, such that it remembers
+the cards that have been played. In essence, we would like to see if the algorithm can learn how to count cards. 
+
 As a follow-up on the goals we set for this project, we note that we accomplished all of
 them: (1) we implemented a reinforcement learning algorithm (Q-learning) for Blackjack
 in (2) Python 3.6 (although we did not see an opportunity to use Tensorflow), and
@@ -21,3 +26,8 @@ environment to work properly code-wise, we did not have time to implement our `i
 of implementing more than one reinforcement learning algorithm and use an ensemble method to
 combine them.
 
+\textit{
+As we saw in section \ref{sec:results} the performance of the Q-learning algorithm was no good on the expanded state space. The average return of the algorithm was always higher when itlearned on the state space using the sum. The algorithm using the state space of the hand was better when 1 deck was used, which is nice but not applicable in real life when blackjack  is played.
+Another loss was also the increase in computational time by a factor of 50\%. This is not scalable for large experiments. It could possibly be circumvented by creating more efficient 
+algorithms or by using another API instead of ''Gym''.
+}
