@@ -2,9 +2,13 @@
 For this project we have implemented a Q-learning algorithm for Blackjack, in the process
 enhancing a popular open source implementation of a Blackjack learning environment to
 support a richer state space and an arbitrary number of decks. In particular, we have shown 
-that an extended state space which stores the number of each type of card the player holds 
-leads to a decreased expected loss compared to a state which only stores the sum of the 
-values of the cards in the player's hands. In terms of the version of Blackjack played,
+that---at least when playing with just one deck---an extended state space which stores the 
+number of each type of card the player holds leads to a decreased expected loss compared to a 
+state which only stores the sum of the values of the cards in the player's hands. Though this
+extended representation makes for a stationary Markov decision process, it turned out to require
+a much larger computational effort than the `sum-state' representation. The latter performed
+better with more than one deck when $10^7$ episodes were used for training.
+In terms of the version of Blackjack played,
 further extensions to our work could make the game more realistic by adding features such
 as splitting and insurance. An extension for the Q-learning algorithm in this case may be
 to run a smaller number of training episodes using the sum-state representation.
