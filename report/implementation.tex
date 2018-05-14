@@ -64,7 +64,7 @@ from one state (call it $s$) to itself when the episode ends (and a reward is gi
 states are missing, and further that the action `hit' may be permissible at the first entry into $s$ but not
 the subsequent one. For these reasons, $Q(s,a)$ will be given an erroneous value in its updates for these states. 
 We also found the infinite deck setting to be less interesting, 
-since it makes counting cards impossible\todo{Insert joke about the movie 21 or the MIT Blackjack Team}.
+since it makes counting cards impossible.
 
 Thus, a somewhat large effort was put into improving the Blackjack environment class from AI Gym. We replaced the
 dealer's first visible card in the state representation by the dealer's visible card sum, made it possible to
