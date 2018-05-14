@@ -16,7 +16,7 @@ meaning that it becomes less important to update the function in this state-acti
 we have not encountered many times before, our estimate of the function value is uncertain, and we should put more emphasis
 on the reward we received for taking action $a$, as well as the currently known best action out of the state $s'$ we transition to.
 For our Blackjack setup, we may note again that the immediate rewards are 0 in all states except for a terminal state, where the payout is made. 
-By convention the function $Q$ is defined to be zero for terminal states. Thus, the update rule \eqref{ref:Qupdate} becomes
+By convention the function $Q$ is defined to be zero for terminal states. Thus, the update rule \eqref{eq:Qupdate} becomes
 % \footnotesize
 \begin{align} \label{eq:bjQupdate}
           Q(s_t,a_t)  \leftarrow 
