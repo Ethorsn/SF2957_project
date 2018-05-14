@@ -15,7 +15,8 @@ Intuitively, our estimate of $Q(s,a)$ should improve with the number of times we
 meaning that it becomes less important to update the function in this state-action pair. Vice versa, in state-action pairs
 we have not encountered many times before, our estimate of the function value is uncertain, and we should put more emphasis
 on the reward we received for taking action $a$, as well as the currently known best action out of the state $s'$ we transition to.
-For our Blackjack setup, we may note again that the immediate rewards are 0 in all states except for a terminal state, where the payout is made. By convention the function $Q$ is defined to be zero for terminal states. Thus, the update rule \ref{eq:Qupdate} becomes
+For our Blackjack setup, we may note again that the immediate rewards are 0 in all states except for a terminal state, where the payout is made. 
+By convention the function $Q$ is defined to be zero for terminal states. Thus, the update rule \eqref{ref:Qupdate} becomes
 % \footnotesize
 \begin{align} \label{eq:bjQupdate}
           Q(s_t,a_t)  \leftarrow 
@@ -28,7 +29,7 @@ For our Blackjack setup, we may note again that the immediate rewards are 0 in a
 
 A choice of $\alpha_t(s_t,a_t)$ that has the intuitive properties mentioned above is $\alpha_t(s_t,a_t) = \#[(s=s_t,a=a_t)]^{-1}$,
 i.e.\ the reciprocal of the number of times action $a = a_t$ has been taken in state $s=s_t$. This choice of $\alpha_t$ satisfies
-the convergence criteria $\sum_t \alpha_t(s_t,a_t) = \infty$ and $\sum_t \alpha^2_t(s_t,a_t) < \infty$ outlined in e.g.\ 
+the convergence criteria $\sum_t \alpha_t(s,a) = \infty$ and $\sum_t \alpha^2_t(s,a) < \infty$ for each pair $(s, a)$ outlined in e.g.\ 
 \citet{Watkins1992}. Further investigation shows that one can do better than this when the function $Q$ is updated 
 asynchronously, i.e.\ one $(s,a)$-pair at a time. \citet{EvenDar2003} show that in this case, the optimal choice is 
 $\alpha_t(s_t,a_t) = \#[(s=s_t,a=a_t)]^{-\omega}$, where $\omega \approx 0.77$. This is the choice of $\alpha_t$ we choose,
