@@ -38,7 +38,7 @@ and $R_{t+1}$ given $s_t,a_t$ is independent of $H_t$, with $\mathbb{E}(R_{t+1} 
 
 At first glance expression \eqref{MDP} makes sense, but there are subtle details which need to be addressed. For instance, we have said nothing about the process $\{A_t \}$ and therefore we should be careful defining conditional probabilities containing it. However, if $\{A_t \}$ is governed by a policy $\pi = (\pi_0,\pi_1,\ldots)$ then we can define the above probability. In order for $\{(S_t,A_t, R_{t+1}),\ t\geq 0  \}$ to be a Markov decision process we formally require that \eqref{MDP} holds for all policies. For a thorough treatment of Markov decision processes see \cite{Puterman}.
 
-The goal of reinforcement learning is to take a MDP and choose a policy which maximizes expected (discounted) rewards. This can seem hopeless since policy decisions in general depends on the whole history of the chain. However, it can be shown that for finite stationary MDPs this is equivalent to maximizing rewards over policies which take into account only the current state of the process and which maps this to a single action, i.e. $\pi_n(H_n) = \pi (S_t)\in A$ --- this is know as a \textit{stationary Markov policy}. This is something that make the optimizing problem considerably easier, and allows e.g. the \textit{Q-learning} algorithm to give estimates that converges to the optimal solution. Hence, from here on out we consider only stationary Markov policies.
+The goal of reinforcement learning is to take a MDP and choose a policy which maximizes expected (discounted) rewards, $\mathbb{E}(\sum_{t=0}^{\infty} R_{t+1})$ This can seem hopeless since policy decisions in general depends on the whole history of the chain. However, it can be shown that for finite stationary MDPs this is equivalent to maximizing rewards over policies which take into account only the current state of the process and which maps this to a single action, i.e. $\pi_n(H_n) = \pi (S_t)\in A$ --- this is know as a \textit{stationary Markov policy}. This is something that make the optimizing problem considerably easier, and allows e.g. the \textit{Q-learning} algorithm to give estimates that converges to the optimal solution. Hence, from here on out we consider only stationary Markov policies.
 
 
 For a given policy $\pi$ define the \textit{value function}
@@ -51,7 +51,7 @@ We say that a policy $\pi^*$ is optimal if
 \begin{align*}
 	V^{\pi^*}(s) \geq V^{\pi}(s)\qquad \forall s \text{ and policies }\pi.
 \end{align*}
-It can be shown that for finite Markov decision processes such a policy exists uniquely. Under the optimal policy $\pi^*$ let $V^*(s) = V^{\pi^*}(s)$.
+It can be shown that for finite Markov decision processes such a policy exists. Under the optimal policy $\pi^*$ let $V^*(s) = V^{\pi^*}(s)$.
 Say we know $V^*(s)$ for all $s$, can this be used to calculate an optimal policy? The answer is yes. One can prove that
 \begin{align}
 	V^*(s) 
@@ -68,9 +68,15 @@ In order to specify the algorithm we need some definitions. Define the \textit{a
 	Q^{\pi} ( s,a  ) = r(s,a) + \sum_{s'} P_{a}(s,s')V^{\pi}(s').
 \end{align}
 That is the expected reward of starting in state $s$ taking action $a$ and then following the policy $\pi$. For terminal states $s$ we set $Q(s,a)=0$ for all $a\in A$. Furthermore, define the optimal action-value function as
+<<<<<<< HEAD
+\begin{align*}
+Q^*  ( s,a  ) =  r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s')
+\end{align*}
+=======
 \begin{align} \label{eq:Qfun_optimal}
 Q^*  ( s,a  ) =  (r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s'))
 \end{align}
+>>>>>>> ffab0390fe015ea8e26f84a413f1b97ae30aafe1
 i.e. the expected reward of being in state $s$ taking action $a$ and then following the optimal policy $\pi^*$. We see that $\max_{a \in A} Q^*(s,a) = V^*(s)$, and 
 with the same argument as above $\pi^*(s) = \max_{a \in A}Q^*(s,a)$. 
 
