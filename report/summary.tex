@@ -1,10 +1,21 @@
 \section{Summary} \label{sec:summary}
 For this project we have implemented a Q-learning algorithm for Blackjack, in the process
 enhancing a popular open source implementation of a Blackjack learning environment to
-support a richer state space and an arbitrary number of decks. In particular, we have shown 
-that an extended state space which stores the number of each type of card the player holds 
-leads to a decreased expected loss compared to a state which only stores the sum of the 
-values of the cards in the player's hands. In terms of the version of Blackjack played,
+support a richer state space and an arbitrary number of decks. 
+%
+As we saw in Section \ref{sec:results}, the performance of the Q-learning algorithm was no 
+good on the expanded state space. 
+The average return of the algorithm was always higher when it learned on the state space using the sum,
+except in the case of using just 1 deck. Nice, but not applicable in real life as Blackjack is always played
+with at least 2 decks.
+Though the extended state representation makes for a stationary Markov decision process, it turned out to require
+a much larger computational effort than the `sum-state' representation;
+it took approximately 50\% more computational time to do the same number of iterations with the extended state
+compared to the sum state. This is not scalable for large experiments,
+but could possibly be circumvented by creating more efficient 
+algorithms or by using another API instead of AI Gym.
+
+In terms of the version of Blackjack played,
 further extensions to our work could make the game more realistic by adding features such
 as splitting and insurance. An extension for the Q-learning algorithm in this case may be
 to run a smaller number of training episodes using the sum-state representation.
@@ -12,7 +23,7 @@ When running the algorithm with an extended state, then, we could initialize the
 values for a given (and previously unseen) state by the corresponding values obtained for
 the sum-state representation, simply by calculating the sum of the player's hand in the
 extended state. This may improve convergence.
-
+%
 Also, the inclusion of several agents in the same training environment would be a very interesting iteration.
 The agents would be playing on the same ''table'' and sharing information by viewing their respective cards. In
 this context, it would also be interesting if we could introduce a memory to the player, such that it remembers
@@ -25,9 +36,3 @@ we have (3) provided a public GitHub repository with our code. However, because 
 environment to work properly code-wise, we did not have time to implement our `if time permits'-goals
 of implementing more than one reinforcement learning algorithm and use an ensemble method to
 combine them.
-
-\textit{
-As we saw in section \ref{sec:results} the performance of the Q-learning algorithm was no good on the expanded state space. The average return of the algorithm was always higher when itlearned on the state space using the sum. The algorithm using the state space of the hand was better when 1 deck was used, which is nice but not applicable in real life when blackjack  is played.
-Another loss was also the increase in computational time by a factor of 50\%. This is not scalable for large experiments. It could possibly be circumvented by creating more efficient 
-algorithms or by using another API instead of ''Gym''.
-}

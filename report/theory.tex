@@ -68,15 +68,9 @@ In order to specify the algorithm we need some definitions. Define the \textit{a
 	Q^{\pi} ( s,a  ) = r(s,a) + \sum_{s'} P_{a}(s,s')V^{\pi}(s').
 \end{align}
 That is the expected reward of starting in state $s$ taking action $a$ and then following the policy $\pi$. For terminal states $s$ we set $Q(s,a)=0$ for all $a\in A$. Furthermore, define the optimal action-value function as
-<<<<<<< HEAD
-\begin{align*}
-Q^*  ( s,a  ) =  r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s')
-\end{align*}
-=======
 \begin{align} \label{eq:Qfun_optimal}
-Q^*  ( s,a  ) =  (r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s'))
+Q^*  ( s,a  ) =  r(s,a) + \sum_{s'} P_{a}(s,s')V^{* }(s')
 \end{align}
->>>>>>> ffab0390fe015ea8e26f84a413f1b97ae30aafe1
 i.e. the expected reward of being in state $s$ taking action $a$ and then following the optimal policy $\pi^*$. We see that $\max_{a \in A} Q^*(s,a) = V^*(s)$, and 
 with the same argument as above $\pi^*(s) = \max_{a \in A}Q^*(s,a)$. 
 
