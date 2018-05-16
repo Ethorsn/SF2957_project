@@ -1,0 +1,43 @@
+
+
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{natbib}
+\usepackage{centernot}
+
+\mode<presentation> {
+
+\usetheme{Warsaw}
+%\usecolortheme{Dolphin}
+}
+\expandafter\def\expandafter\insertshorttitle\expandafter{%
+	\insertshorttitle\hfill%
+	\insertframenumber\,/\,\inserttotalframenumber}
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and 
+
+\title[Reinforcement Learning]{ Reinforcement Learning for Blackjack} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Benjamin Alléviusm, Sebastian Rosengren, Erik Thorsén} % Your name
+\institute[SU] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+Department of Mathematics, Stockholm University
+}
+\date % Date, can be changed to a custom date
+
+\begin{document}
+	
+\begin{frame}
+	\titlepage % Print the title page as the first slide
+	\centering
+\end{frame}
+\input{Part_I}
+\input{Part_II}
+\input{Part_III}
+
+
+\end{document}
+
+
+
