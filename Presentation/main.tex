@@ -3,8 +3,22 @@
 \documentclass{beamer}
 
 \usepackage[utf8]{inputenc}
-\usepackage{natbib}
+\usepackage[numbers]{natbib}
 \usepackage{centernot}
+
+\newcommand{\defeq}{\coloneqq} % :=
+\newcommand{\eqdef}{\eqqcolon} % =:
+
+\renewcommand{\P}{\mathbb{P}} % probability P
+\newcommand{\E}{\mathbb{E}} % expectation E
+\newcommand{\V}{\mathbb{V}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\IX}{\bs{1}}
+
+\newcommand{\eps}{\epsilon}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 \mode<presentation> {
 
@@ -36,7 +50,10 @@ Department of Mathematics, Stockholm University
 \input{Part_II}
 \input{Part_III}
 
-
+\begin{frame}{References}
+\bibliographystyle{apalike}
+\bibliography{references}
+\end{frame}
 \end{document}
 
 

@@ -1,0 +1,43 @@
+\section{Implementation}
+
+\begin{frame}{Q-Learning for Blackjack}
+In a given state, do we \emph{hit} or \emph{stand}? 
+\begin{itemize}
+  \item Action-value function for policy $\pi$: $q_{\pi} = \E_{\pi}[R_{T} | S_t = s, A_t = a]$, $T>t$ and $S_T$ terminal.
+  \item Estimate $q$ for the optimal $\pi$ by the \emph{learned} action-value function
+    \begin{align*}
+      Q(s_t,a_t)  &\leftarrow (1-\alpha_t(s_t,a_t))Q(s_t,a_t) \\
+                  &~+ \alpha_t(s_t,a_t)[ r_{t+1} + \max_{a \in A} Q(s_{t+1},a) ]
+    \end{align*}
+  \item $Q$ approximates optimal $q_*$ \emph{independent of policy}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q-Learning Implementation}
+Blackjack has discrete and finite action and state spaces $\Rightarrow$
+algorithm guaranteed to converge if
+\begin{itemize}
+        \item Learning rate $\alpha_t(s,a) \in (0, 1]$ is such that
+          \begin{align*}
+            \sum_t \alpha_t(s,a) = \infty \text{ and } \sum_t \alpha^2_t(s,a) < \infty
+          \end{align*}
+          for each pair $(s, a)$.
+        \item All state-action pairs are visited infinitely often (in the limit).
+\end{itemize}
+To do this, we set
+\begin{itemize}
+  \item $\alpha_t(s,a) = \frac{1}{\#[(s=s_t,a=a_t)]^{0.77}} \text{ \citep[see][]{EvenDar2003}}$
+  \item $\epsilon_t(s) = \frac{0.5}{\#[(s=s_t)]}$ \text{ ($\epsilon$-greedy with decay)}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Blackjack Learning Environment}
+To apply Q-learning to Blackjack, we used the OpenAI Gym environment (\url{https://gym.openai.com/}).
+In doing so we
+\begin{itemize}
+  \item Fixed the `broken' default state space.
+  \item Implemented the extended state space.
+  \item Extended the environment from an infinite deck to an arbitrary number of decks.
+\end{itemize}
+Our code will be made publicly available, possibly through OpenAI Gym.
+\end{frame}
