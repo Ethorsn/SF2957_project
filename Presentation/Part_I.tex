@@ -31,23 +31,22 @@
 	Recall the building blocks of a Markov Decision Process:
 	\begin{enumerate}[(i)]
 		\item  $S$ a finite space of \textit{states}
-		\item  $A$ a finite space of \textit{actions}
-		\item  $R$ a finite space of \textit{rewards}
+		\item  $A$ a finite space of \textit{actions}, here $A = \{\text{hit, stay}\}$
+		\item  $R$ a finite space of \textit{rewards}, here $R = \{\text{-1, 0, 1, 1.5} \}$
 		\item  $P_a(s,s')$ a transition probability function defined for all  $(s,a,s') \in S\times A \times S$
 		\item  $r(s,a)$ the immediate or expected immediate reward of taking action $a$ in state $s$.
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}{Blackjack as a Markov Decision Process}
-We represent the state space $S$ in two different ways.
-First, let
+We represent the state space $S$ in two different ways.\\
+First state space:
 \begin{align*}
 &S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d})  \} \\
 &= \{ (\text{(number of different cards of each type), dealer card sum}) \}.
 \end{align*}
-
-Secondly, let
-
+\pause
+Second state space:
 \begin{align*}
 S = \{  (\Sigma_p, a_p, \Sigma_d )  \}=\{  (\text{card sum, usable ace, dealer card sum})  \}
 \end{align*}
