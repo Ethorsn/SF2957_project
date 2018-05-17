@@ -1,2 +1,63 @@
 
 
+\section{Introduction}
+
+\begin{frame}{Purpose}
+	Use reinforcement learning to train an \textit{agent} to play blackjack\newline
+	
+	Investigate Learning capabilities of the framework\newline
+		
+	Compare two different representations of the state space
+\end{frame}
+
+\begin{frame}{Blackjack}
+\begin{itemize}
+	\item One player against the dealer, with player staking one unit on each hand;
+	\item two actions possible: ask for another card, or stay;
+	\item cards 2--10 counts as their numerical value, suites counts as 10, and ace counts as either 1 or 11 depending on whichever is best. If an ace can be counted as 11 without player going bust it is known as a \textit{usable} ace, the same goes for the dealer.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Blackjack}
+	The goal of the player is to beat the dealer in one of the following ways
+	\begin{itemize}
+		\item Get 21 points on the first two cards, knows as a blackjack, without a dealer blackjack. \textbf{Net profit}: 1.5 times stake;
+		\item Reach a final score higher than the dealer without exceeding 21. \textbf{Net profit}: stake;
+		\item Dealer gets points exceeding 21 and player does not. \textbf{Net profit}: stake.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Blackjack as a Markov Decision Process}
+	Recall the building blocks of a Markov Decision Process:
+	\begin{enumerate}[(i)]
+		\item  $S$ a finite space of \textit{states}
+		\item  $A$ a finite space of \textit{actions}
+		\item  $R$ a finite space of \textit{rewards}
+		\item  $P_a(s,s')$ a transition probability function defined for all  $(s,a,s') \in S\times A \times S$
+		\item  $r(s,a)$ the immediate or expected immediate reward of taking action $a$ in state $s$.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Blackjack as a Markov Decision Process}
+We represent the state space $S$ in two different ways.
+First, let
+\begin{align*}
+&S = \{  (s_{p1},\ldots,s_{p10},\Sigma_{d})  \} \\
+&= \{ (\text{(number of different cards of each type), dealer card sum}) \}.
+\end{align*}
+
+Secondly, let
+
+\begin{align*}
+S = \{  (\Sigma_p, a_p, \Sigma_d )  \}=\{  (\text{card sum, usable ace, dealer card sum})  \}
+\end{align*}
+This representation does not yield a \textit{stationary} Markov process since
+\begin{align*}
+	&s_0 = (21, 1, x),\qquad s_5 = (21,1,x)\\
+	&r(s_0, \text{stay}) = 1.5 \neq r(s_5, \text{stay}). 
+\end{align*}
+
+
+\end{frame}
+
+
